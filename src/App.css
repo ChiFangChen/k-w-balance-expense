@@ -70,8 +70,8 @@ body {
   -webkit-overflow-scrolling: touch;
 }
 .page {
-  padding: 1rem;
-  min-height: 100%;
+  padding: 1.5rem 1rem 1rem;
+  min-height: calc(100dvh - 64px - env(safe-area-inset-bottom, 0px));
 }
 
 /* NavBar */
@@ -122,9 +122,8 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: 100%;
-  padding-left: 1.5rem;
-  padding-right: 1.5rem;
+  min-height: 100dvh;
+  padding: 2rem 1.5rem;
   gap: 1.5rem;
   text-align: center;
 }
@@ -149,7 +148,7 @@ body {
   width: 8rem;
   height: 8rem;
   border-radius: 1rem;
-  border: 2px solid;
+  border: none;
   font-size: 1.125rem;
   font-weight: 700;
   cursor: pointer;
@@ -160,12 +159,10 @@ body {
 }
 .identity-btn.kiki-btn {
   background-color: var(--color-kiki-light);
-  border-color: var(--color-kiki);
   color: var(--color-kiki);
 }
 .identity-btn.wayne-btn {
   background-color: var(--color-wayne-light);
-  border-color: var(--color-wayne);
   color: var(--color-wayne);
 }
 .identity-emoji {
@@ -218,7 +215,7 @@ body {
 .card {
   background-color: var(--color-card);
   border-radius: var(--radius-lg);
-  border: 1px solid var(--color-border);
+
   padding: 1rem;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
@@ -246,7 +243,7 @@ body {
   flex: 1;
   background-color: var(--color-card);
   border-radius: var(--radius-lg);
-  border: 1px solid var(--color-border);
+
   padding: 1rem;
   text-align: center;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
@@ -285,7 +282,7 @@ body {
 .grand-total {
   background-color: var(--color-card);
   border-radius: var(--radius-lg);
-  border: 1px solid var(--color-border);
+
   padding: 1rem;
   text-align: center;
   margin-bottom: 1rem;
@@ -310,7 +307,7 @@ body {
 .gap-info {
   background-color: var(--color-card);
   border-radius: var(--radius-lg);
-  border: 1px solid var(--color-border);
+
   padding: 1rem;
   margin-bottom: 1rem;
   text-align: center;
@@ -322,7 +319,7 @@ body {
 .chart-container {
   background-color: var(--color-card);
   border-radius: var(--radius-lg);
-  border: 1px solid var(--color-border);
+
   padding: 1rem;
   margin-bottom: 1rem;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
@@ -378,7 +375,7 @@ body {
 .btn-secondary {
   background-color: var(--color-muted);
   color: var(--color-foreground);
-  border: 1px solid var(--color-border);
+
 }
 .btn-secondary:hover {
   background-color: var(--color-border);
@@ -432,18 +429,17 @@ body {
 .form-group input,
 .form-group select {
   padding: 0.625rem 0.75rem;
-  border: 1px solid var(--color-border);
+  border: none;
   border-radius: var(--radius-md);
   background-color: var(--color-background);
   color: var(--color-foreground);
   font-size: 0.875rem;
   outline: none;
-  transition: border-color 0.15s, box-shadow 0.15s;
+  transition: box-shadow 0.15s;
 }
 .form-group input:focus,
 .form-group select:focus {
-  border-color: var(--color-ring);
-  box-shadow: 0 0 0 1px var(--color-ring);
+  box-shadow: 0 0 0 2px var(--color-ring);
 }
 .form-group input::placeholder {
   color: var(--color-muted-foreground);
@@ -509,11 +505,14 @@ body {
   max-height: calc(100vh - 80px);
   overflow-y: auto;
   animation: slideUp 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
 }
 .dialog h3 {
   font-size: 1.125rem;
   font-weight: 600;
-  margin-bottom: 1rem;
+  margin-bottom: 0;
 }
 .dialog-title {
   font-size: 1.125rem;
@@ -523,13 +522,13 @@ body {
 .dialog-message {
   font-size: 0.875rem;
   color: var(--color-muted-foreground);
-  margin-bottom: 1rem;
+  margin-bottom: 0;
   line-height: 1.625;
 }
 .dialog-actions {
   display: flex;
   gap: 0.75rem;
-  margin-top: 1.25rem;
+  margin-top: 0.25rem;
 }
 .dialog-actions .btn {
   flex: 1;
@@ -549,17 +548,16 @@ body {
 .search-bar input {
   width: 100%;
   padding: 0.625rem 0.75rem;
-  border: 1px solid var(--color-border);
+  border: none;
   border-radius: var(--radius-md);
   background-color: var(--color-card);
   color: var(--color-foreground);
   font-size: 0.875rem;
   outline: none;
-  transition: border-color 0.15s, box-shadow 0.15s;
+  transition: box-shadow 0.15s;
 }
 .search-bar input:focus {
-  border-color: var(--color-ring);
-  box-shadow: 0 0 0 1px var(--color-ring);
+  box-shadow: 0 0 0 2px var(--color-ring);
 }
 .search-bar input::placeholder {
   color: var(--color-muted-foreground);
@@ -593,7 +591,7 @@ body {
   align-items: center;
   background-color: var(--color-card);
   border-radius: var(--radius-lg);
-  border: 1px solid var(--color-border);
+
   padding: 0.75rem;
   cursor: pointer;
   transition: background-color 0.15s;
@@ -666,7 +664,7 @@ body {
   justify-content: space-between;
   background-color: var(--color-card);
   border-radius: var(--radius-lg);
-  border: 1px solid var(--color-border);
+
   padding: 0.75rem;
 }
 .template-info {
@@ -698,7 +696,7 @@ body {
 .settings-section {
   background-color: var(--color-card);
   border-radius: var(--radius-lg);
-  border: 1px solid var(--color-border);
+
   padding: 1rem;
   margin-bottom: 1rem;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
@@ -733,7 +731,7 @@ body {
 .rate-input {
   flex: 1;
   padding: 0.375rem 0.5rem;
-  border: 1px solid var(--color-border);
+  border: none;
   border-radius: var(--radius-md);
   background-color: var(--color-background);
   color: var(--color-foreground);
@@ -757,7 +755,7 @@ body {
 .log-item {
   background-color: var(--color-card);
   border-radius: var(--radius-lg);
-  border: 1px solid var(--color-border);
+
   padding: 0.75rem;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
