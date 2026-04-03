@@ -55,6 +55,12 @@ body {
   background-color: var(--color-background);
   color: var(--color-foreground);
 }
+.svg-inline--fa {
+  margin-right: 0.25em;
+}
+.svg-inline--fa:last-child {
+  margin-right: 0;
+}
 
 /* App layout */
 .app {
