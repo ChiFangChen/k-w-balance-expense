@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { Pie } from 'react-chartjs-2'
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faScaleBalanced, faTrashCan, faLightbulb, faPlus } from '@fortawesome/free-solid-svg-icons'
 import { useApp } from '../context/AppContext'
 import { calculateTotals, calculateCurrentRatio, calculateGap } from '../utils/balance'
 import { ConfirmDialog } from '../components/ConfirmDialog'
@@ -28,8 +30,8 @@ export function Dashboard() {
     datasets: [
       {
         data: [totals.kiki || 0, totals.wayne || 0],
-        backgroundColor: ['#FF6B9D', '#4ECDC4'],
-        borderColor: ['#FF6B9D', '#4ECDC4'],
+        backgroundColor: ['#f472b6', '#2dd4bf'],
+        borderColor: ['#f472b6', '#2dd4bf'],
         borderWidth: 2,
       },
     ],
@@ -67,7 +69,7 @@ export function Dashboard() {
           K
         </button>
         <button className="btn quick-add-btn neutral-color" onClick={() => openForm()}>
-          +
+          <FontAwesomeIcon icon={faPlus} />
         </button>
         <button className="btn quick-add-btn wayne-color" onClick={() => openForm('Wayne')}>
           W
@@ -96,7 +98,8 @@ export function Dashboard() {
       {/* Gap */}
       {gap.person && (
         <div className="gap-info">
-          💡 {gap.person} 還需要花 <strong>${gap.amount.toLocaleString()}</strong> {settings.defaultCurrency} 才能達到目標比例
+          <FontAwesomeIcon icon={faLightbulb} style={{ marginRight: '0.5rem', color: 'var(--color-warning)' }} />
+          {gap.person} 還需要花 <strong>${gap.amount.toLocaleString()}</strong> {settings.defaultCurrency} 才能達到目標比例
         </div>
       )}
 
@@ -107,23 +110,23 @@ export function Dashboard() {
         </div>
       )}
 
-      {/* Action Buttons */}
-      <div className="action-buttons gap-3">
-        <button
-          className="btn btn-warning"
-          onClick={() => setShowBalanceConfirm(true)}
-          disabled={total === 0}
-        >
-          ⚖️ 平衡
-        </button>
-        <button
-          className="btn btn-danger"
-          onClick={() => setShowResetConfirm(true)}
-          disabled={total === 0}
-        >
-          🗑️ 重置
-        </button>
-      </div>
+      {/* Action Buttons - only show when there's data */}
+      {total > 0 && (
+        <div className="action-buttons">
+          <button
+            className="btn btn-warning"
+            onClick={() => setShowBalanceConfirm(true)}
+          >
+            <FontAwesomeIcon icon={faScaleBalanced} /> 平衡
+          </button>
+          <button
+            className="btn btn-danger"
+            onClick={() => setShowResetConfirm(true)}
+          >
+            <FontAwesomeIcon icon={faTrashCan} /> 重置
+          </button>
+        </div>
+      )}
 
       {/* Confirm Dialogs */}
       <ConfirmDialog

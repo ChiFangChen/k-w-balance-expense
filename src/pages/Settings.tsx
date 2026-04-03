@@ -1,7 +1,11 @@
 import { useState } from 'react'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faMoon, faSun, faRotate, faPlus, faXmark } from '@fortawesome/free-solid-svg-icons'
 import { useApp } from '../context/AppContext'
 import { fetchExchangeRates } from '../utils/currency'
 import { clearIdentity } from '../utils/storage'
+
+const CURRENCY_WHITELIST = ['TWD', 'JPY', 'THB', 'USD', 'CNY']
 
 export function SettingsPage() {
   const { state, updateSettings } = useApp()
@@ -10,7 +14,8 @@ export function SettingsPage() {
   const [ratioWayne, setRatioWayne] = useState(settings.ratioWayne.toString())
   const [ratioKiki, setRatioKiki] = useState(settings.ratioKiki.toString())
   const [loadingRates, setLoadingRates] = useState(false)
-  const CURRENCY_WHITELIST = ['TWD', 'JPY', 'THB', 'USD', 'CNY']
+  const [showAddCurrency, setShowAddCurrency] = useState(false)
+  const [allRates, setAllRates] = useState<Record<string, number>>({})
 
   const handleRatioSave = () => {
     const w = parseInt(ratioWayne)
@@ -26,7 +31,16 @@ export function SettingsPage() {
     setLoadingRates(true)
     try {
       const rates = await fetchExchangeRates(settings.defaultCurrency)
-      updateSettings({ exchangeRates: rates })
+      // Only update rates for currencies we're tracking
+      const trackedCodes = Object.keys(settings.exchangeRates)
+      const updatedRates: Record<string, number> = {}
+      for (const code of trackedCodes) {
+        if (rates[code]) {
+          updatedRates[code] = rates[code]
+        }
+      }
+      updateSettings({ exchangeRates: { ...settings.exchangeRates, ...updatedRates } })
+      setAllRates(rates) // Store all rates for the "add" dialog
     } catch {
       alert('取得匯率失敗，請稍後再試')
     } finally {
@@ -42,19 +56,59 @@ export function SettingsPage() {
     })
   }
 
+  const handleRemoveCurrency = (code: string) => {
+    const newRates = { ...settings.exchangeRates }
+    delete newRates[code]
+    updateSettings({ exchangeRates: newRates })
+  }
+
+  const handleAddCurrency = async (code: string) => {
+    // If we have fetched rates, use them; otherwise set to 1
+    const rate = allRates[code] || settings.exchangeRates[code] || 1
+    updateSettings({
+      exchangeRates: { ...settings.exchangeRates, [code]: rate },
+    })
+    setShowAddCurrency(false)
+  }
+
+  const handleOpenAddCurrency = async () => {
+    if (Object.keys(allRates).length === 0) {
+      // Fetch rates first to populate the dropdown
+      try {
+        const rates = await fetchExchangeRates(settings.defaultCurrency)
+        setAllRates(rates)
+      } catch {
+        // Fallback: show common currencies
+      }
+    }
+    setShowAddCurrency(true)
+  }
+
   const handleSwitchIdentity = () => {
     clearIdentity()
     window.location.reload()
   }
 
   const themes = [
-    { value: 'dark' as const, label: '🌙 深色簡約' },
-    { value: 'light' as const, label: '☀️ 亮色簡約' },
+    { value: 'dark' as const, label: '深色', icon: faMoon },
+    { value: 'light' as const, label: '亮色', icon: faSun },
   ]
 
-  const displayedRates = Object.entries(settings.exchangeRates)
-    .filter(([code]) => CURRENCY_WHITELIST.includes(code))
-    .sort(([a], [b]) => CURRENCY_WHITELIST.indexOf(a) - CURRENCY_WHITELIST.indexOf(b))
+  const trackedCurrencies = Object.entries(settings.exchangeRates)
+    .filter(([code]) => code !== settings.defaultCurrency)
+    .sort(([a], [b]) => {
+      const aIdx = CURRENCY_WHITELIST.indexOf(a)
+      const bIdx = CURRENCY_WHITELIST.indexOf(b)
+      if (aIdx >= 0 && bIdx >= 0) return aIdx - bIdx
+      if (aIdx >= 0) return -1
+      if (bIdx >= 0) return 1
+      return a.localeCompare(b)
+    })
+
+  // Currencies available to add (from API rates, not already tracked)
+  const availableToAdd = Object.keys(allRates)
+    .filter((code) => code !== settings.defaultCurrency && !settings.exchangeRates[code])
+    .sort()
 
   return (
     <div className="page settings-page">
@@ -87,7 +141,7 @@ export function SettingsPage() {
             />
           </div>
         </div>
-        <button className="btn btn-primary" onClick={handleRatioSave}>
+        <button className="btn btn-primary" onClick={handleRatioSave} style={{ marginTop: '0.75rem' }}>
           儲存
         </button>
       </section>
@@ -96,12 +150,14 @@ export function SettingsPage() {
       <section className="settings-section">
         <h2>預設幣別</h2>
         <div className="form-group">
-          <input
-            type="text"
+          <select
             value={settings.defaultCurrency}
-            onChange={(e) => updateSettings({ defaultCurrency: e.target.value.toUpperCase() })}
-            placeholder="TWD"
-          />
+            onChange={(e) => updateSettings({ defaultCurrency: e.target.value })}
+          >
+            {CURRENCY_WHITELIST.map((c) => (
+              <option key={c} value={c}>{c}</option>
+            ))}
+          </select>
         </div>
       </section>
 
@@ -109,16 +165,26 @@ export function SettingsPage() {
       <section className="settings-section">
         <h2>匯率管理</h2>
         <p className="settings-hint">1 外幣 = ? {settings.defaultCurrency}</p>
-        <button
-          className="btn btn-primary"
-          onClick={handleFetchRates}
-          disabled={loadingRates}
-        >
-          {loadingRates ? '取得中...' : '🔄 取得最新匯率'}
-        </button>
+        <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.75rem' }}>
+          <button
+            className="btn btn-secondary"
+            onClick={handleFetchRates}
+            disabled={loadingRates}
+            style={{ flex: 1 }}
+          >
+            <FontAwesomeIcon icon={faRotate} spin={loadingRates} />
+            {loadingRates ? ' 取得中...' : ' 更新匯率'}
+          </button>
+          <button
+            className="btn btn-primary"
+            onClick={handleOpenAddCurrency}
+          >
+            <FontAwesomeIcon icon={faPlus} /> 新增
+          </button>
+        </div>
 
         <div className="rate-list">
-          {displayedRates.map(([code, rate]) => (
+          {trackedCurrencies.map(([code, rate]) => (
             <div key={code} className="rate-item">
               <span className="rate-code">{code}</span>
               <input
@@ -128,10 +194,50 @@ export function SettingsPage() {
                 step="any"
                 onBlur={(e) => handleUpdateRate(code, e.target.value)}
               />
+              <button
+                className="btn-icon btn-delete"
+                onClick={() => handleRemoveCurrency(code)}
+                title="移除"
+              >
+                <FontAwesomeIcon icon={faXmark} />
+              </button>
             </div>
           ))}
+          {trackedCurrencies.length === 0 && (
+            <div className="empty-state" style={{ padding: '1rem 0' }}>尚未追蹤任何外幣</div>
+          )}
         </div>
       </section>
+
+      {/* Add Currency Dialog */}
+      {showAddCurrency && (
+        <div className="dialog-overlay" onClick={() => setShowAddCurrency(false)}>
+          <div className="dialog" onClick={(e) => e.stopPropagation()}>
+            <h3>新增追蹤幣別</h3>
+            {availableToAdd.length === 0 && Object.keys(allRates).length === 0 ? (
+              <p className="settings-hint">載入幣別中...</p>
+            ) : (
+              <div style={{ maxHeight: '300px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                {(availableToAdd.length > 0 ? availableToAdd : CURRENCY_WHITELIST.filter(c => c !== settings.defaultCurrency && !settings.exchangeRates[c])).map((code) => (
+                  <button
+                    key={code}
+                    className="btn btn-secondary"
+                    onClick={() => handleAddCurrency(code)}
+                    style={{ justifyContent: 'flex-start' }}
+                  >
+                    {code} {allRates[code] ? `(${allRates[code].toFixed(4)})` : ''}
+                  </button>
+                ))}
+              </div>
+            )}
+            <div className="dialog-actions">
+              <button className="btn btn-secondary" onClick={() => setShowAddCurrency(false)}>
+                關閉
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Theme */}
       <section className="settings-section">
@@ -143,7 +249,7 @@ export function SettingsPage() {
               className={`btn ${settings.theme === t.value ? 'btn-primary' : 'btn-secondary'}`}
               onClick={() => updateSettings({ theme: t.value })}
             >
-              {t.label}
+              <FontAwesomeIcon icon={t.icon} /> {t.label}
             </button>
           ))}
         </div>

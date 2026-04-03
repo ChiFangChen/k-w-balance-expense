@@ -1,4 +1,6 @@
 import { useState } from 'react'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faTriangleExclamation } from '@fortawesome/free-solid-svg-icons'
 
 interface ConfirmDialogProps {
   isOpen: boolean
@@ -44,7 +46,12 @@ export function ConfirmDialog({
       <div className="dialog" onClick={(e) => e.stopPropagation()}>
         <h3 className="dialog-title">{title}</h3>
         <p className="dialog-message">
-          {secondConfirm ? '⚠️ 再次確認，此操作無法復原！' : message}
+          {secondConfirm ? (
+            <>
+              <FontAwesomeIcon icon={faTriangleExclamation} style={{ color: 'var(--color-warning)', marginRight: '0.5rem' }} />
+              再次確認，此操作無法復原！
+            </>
+          ) : message}
         </p>
         <div className="dialog-actions">
           <button className="btn btn-secondary" onClick={handleCancel}>

@@ -1,4 +1,6 @@
 import { useState } from 'react'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faBolt, faPenToSquare, faGear, faTrashCan, faPlus } from '@fortawesome/free-solid-svg-icons'
 import { useApp } from '../context/AppContext'
 import type { Template, Person } from '../types'
 import { ExpenseForm } from '../components/ExpenseForm'
@@ -88,7 +90,7 @@ export function Templates() {
       <header className="page-header">
         <h1>模板</h1>
         <button className="btn btn-primary" onClick={() => openTemplateForm()}>
-          + 新增模板
+          <FontAwesomeIcon icon={faPlus} /> 新增模板
         </button>
       </header>
 
@@ -115,28 +117,28 @@ export function Templates() {
                 onClick={() => handleQuickCreate(template)}
                 title="快速創建"
               >
-                ⚡
+                <FontAwesomeIcon icon={faBolt} />
               </button>
               <button
                 className="btn btn-sm btn-secondary"
                 onClick={() => handleEditCreate(template)}
                 title="編輯創建"
               >
-                ✏️
+                <FontAwesomeIcon icon={faPenToSquare} />
               </button>
               <button
                 className="btn btn-sm btn-secondary"
                 onClick={() => openTemplateForm(template)}
                 title="編輯模板"
               >
-                ⚙️
+                <FontAwesomeIcon icon={faGear} />
               </button>
               <button
                 className="btn btn-sm btn-danger"
                 onClick={() => deleteTemplate(template.id)}
                 title="刪除模板"
               >
-                🗑️
+                <FontAwesomeIcon icon={faTrashCan} />
               </button>
             </div>
           </div>

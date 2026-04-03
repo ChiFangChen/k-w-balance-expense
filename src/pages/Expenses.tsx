@@ -1,4 +1,6 @@
 import { useState, useMemo } from 'react'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faPlus } from '@fortawesome/free-solid-svg-icons'
 import { useApp } from '../context/AppContext'
 import { ExpenseForm } from '../components/ExpenseForm'
 import type { Person, Expense } from '../types'
@@ -49,7 +51,7 @@ export function Expenses() {
       {/* Quick Add */}
       <div className="quick-add">
         <button className="btn quick-add-btn kiki-color" onClick={() => openForm('Kiki')}>K</button>
-        <button className="btn quick-add-btn neutral-color" onClick={() => openForm()}>+</button>
+        <button className="btn quick-add-btn neutral-color" onClick={() => openForm()}><FontAwesomeIcon icon={faPlus} /></button>
         <button className="btn quick-add-btn wayne-color" onClick={() => openForm('Wayne')}>W</button>
       </div>
 

@@ -1,3 +1,5 @@
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faScaleBalanced, faTrashCan } from '@fortawesome/free-solid-svg-icons'
 import { useApp } from '../context/AppContext'
 
 export function OperationLogs() {
@@ -23,7 +25,7 @@ export function OperationLogs() {
           <div key={log.id} className="log-item">
             <div className="log-header">
               <span className={`log-type ${log.type}`}>
-                {log.type === 'balance' ? '⚖️ 平衡' : '🗑️ 重置'}
+                {log.type === 'balance' ? <><FontAwesomeIcon icon={faScaleBalanced} /> 平衡</> : <><FontAwesomeIcon icon={faTrashCan} /> 重置</>}
               </span>
               <span className="log-date">{formatDate(log.timestamp)}</span>
             </div>
