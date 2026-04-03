@@ -804,14 +804,28 @@ body {
   font-size: 0.875rem;
   font-weight: 500;
 }
-.color-picker-item input[type="color"] {
-  width: 2.5rem;
-  height: 2.5rem;
+.color-picker-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 9999px;
   border: none;
-  border-radius: var(--radius-md);
   cursor: pointer;
-  background: none;
-  padding: 0;
+  position: relative;
+}
+.color-picker-icon {
+  font-size: 0.625rem;
+  color: white;
+  pointer-events: none;
+}
+.color-input-hidden {
+  position: absolute;
+  width: 0;
+  height: 0;
+  opacity: 0;
+  overflow: hidden;
 }
 .add-currency {
   margin-top: 0.75rem;

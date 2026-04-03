@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faMoon, faSun, faRotate, faPlus, faXmark } from '@fortawesome/free-solid-svg-icons'
+import { faMoon, faSun, faRotate, faPlus, faXmark, faSync } from '@fortawesome/free-solid-svg-icons'
 import { useApp } from '../context/AppContext'
 import { fetchExchangeRates } from '../utils/currency'
 import { clearIdentity } from '../utils/storage'
@@ -283,19 +283,27 @@ export function SettingsPage() {
         <div className="color-pickers">
           <div className="color-picker-item">
             <label>Kiki</label>
-            <input
-              type="color"
-              value={settings.colorKiki}
-              onChange={(e) => updateSettings({ colorKiki: e.target.value })}
-            />
+            <label className="color-picker-btn" style={{ backgroundColor: settings.colorKiki }}>
+              <FontAwesomeIcon icon={faSync} className="color-picker-icon" />
+              <input
+                type="color"
+                value={settings.colorKiki}
+                onChange={(e) => updateSettings({ colorKiki: e.target.value })}
+                className="color-input-hidden"
+              />
+            </label>
           </div>
           <div className="color-picker-item">
             <label>Wayne</label>
-            <input
-              type="color"
-              value={settings.colorWayne}
-              onChange={(e) => updateSettings({ colorWayne: e.target.value })}
-            />
+            <label className="color-picker-btn" style={{ backgroundColor: settings.colorWayne }}>
+              <FontAwesomeIcon icon={faSync} className="color-picker-icon" />
+              <input
+                type="color"
+                value={settings.colorWayne}
+                onChange={(e) => updateSettings({ colorWayne: e.target.value })}
+                className="color-input-hidden"
+              />
+            </label>
           </div>
         </div>
       </section>
