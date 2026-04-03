@@ -30,8 +30,8 @@ export function Dashboard() {
     datasets: [
       {
         data: [totals.kiki || 0, totals.wayne || 0],
-        backgroundColor: ['#f472b6', '#2dd4bf'],
-        borderColor: ['#f472b6', '#2dd4bf'],
+        backgroundColor: ['#ec4899', '#14b8a6'],
+        borderColor: ['#ec4899', '#14b8a6'],
         borderWidth: 2,
       },
     ],
