@@ -130,7 +130,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         const unsub1 = subscribeToExpenses(db, (expenses) => dispatch({ type: 'SET_EXPENSES', expenses }))
         const unsub2 = subscribeToTemplates(db, (templates) => dispatch({ type: 'SET_TEMPLATES', templates }))
         const unsub3 = subscribeToOperationLogs(db, (logs) => dispatch({ type: 'SET_OPERATION_LOGS', logs }))
-        const unsub4 = subscribeToSettings(db, (settings) => dispatch({ type: 'SET_SETTINGS', settings }))
+        const unsub4 = subscribeToSettings(db, (remoteSettings) => {
+          // Preserve local theme when syncing settings from Firebase
+          const { theme: _, ...rest } = remoteSettings
+          dispatch({ type: 'UPDATE_SETTINGS', settings: rest })
+        })
         return () => {
           unsub1()
           unsub2()
@@ -201,9 +205,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const updateSettingsAction = useCallback((settings: Partial<Settings>) => {
     dispatch({ type: 'UPDATE_SETTINGS', settings })
-    // We need to sync the merged settings
+    // Sync settings to Firebase, but exclude theme (local-only preference)
     const merged = { ...state.settings, ...settings }
-    if (dbRef.current) syncSettings(dbRef.current, merged)
+    const { theme: _, ...settingsToSync } = merged
+    if (dbRef.current) syncSettings(dbRef.current, settingsToSync as Settings)
   }, [state.settings])
 
   const performBalanceAction = useCallback(() => {
