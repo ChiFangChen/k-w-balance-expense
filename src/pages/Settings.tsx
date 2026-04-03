@@ -159,14 +159,6 @@ export function SettingsPage() {
         </div>
       </section>
 
-      {/* Default Currency */}
-      <section className="settings-section">
-        <div style={{ display: 'flex', alignItems: 'center' }}>
-          <h2 style={{ margin: 0 }}>主幣別</h2>
-          <span className="settings-value" style={{ marginLeft: 'auto' }}>TWD</span>
-        </div>
-      </section>
-
       {/* Exchange Rates */}
       <section className="settings-section">
         <div style={{ display: 'flex', alignItems: 'center', marginBottom: '0.75rem' }}>
