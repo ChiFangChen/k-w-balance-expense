@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faMoon, faSun, faRotate, faPlus, faXmark, faSync } from '@fortawesome/free-solid-svg-icons'
+import { faMoon, faSun, faRotate, faPlus, faTrash, faSync, faCheck, faTimes } from '@fortawesome/free-solid-svg-icons'
 import { useApp } from '../context/AppContext'
 import { fetchExchangeRates } from '../utils/currency'
 import { clearIdentity } from '../utils/storage'
@@ -16,6 +16,21 @@ export function SettingsPage() {
   const [loadingRates, setLoadingRates] = useState(false)
   const [showAddCurrency, setShowAddCurrency] = useState(false)
   const [allRates, setAllRates] = useState<Record<string, number>>({})
+  const [editingRate, setEditingRate] = useState<string | null>(null)
+  const [editingRateValue, setEditingRateValue] = useState('')
+  const [currencySearch, setCurrencySearch] = useState('')
+
+  const TRACKED_KEY = 'kw-tracked-currencies'
+  const [trackedList, setTrackedList] = useState<string[]>(() => {
+    const saved = localStorage.getItem(TRACKED_KEY)
+    if (saved) return JSON.parse(saved)
+    return Object.keys(settings.exchangeRates).filter((c) => c !== settings.defaultCurrency)
+  })
+
+  const saveTrackedList = (list: string[]) => {
+    setTrackedList(list)
+    localStorage.setItem(TRACKED_KEY, JSON.stringify(list))
+  }
 
   const handleWayneChange = (value: string) => {
     setRatioWayne(value)
@@ -45,16 +60,12 @@ export function SettingsPage() {
     setLoadingRates(true)
     try {
       const rates = await fetchExchangeRates(settings.defaultCurrency)
-      // Only update rates for currencies we're tracking
-      const trackedCodes = Object.keys(settings.exchangeRates)
-      const updatedRates: Record<string, number> = {}
-      for (const code of trackedCodes) {
-        if (rates[code]) {
-          updatedRates[code] = rates[code]
-        }
-      }
-      updateSettings({ exchangeRates: { ...settings.exchangeRates, ...updatedRates }, exchangeRatesUpdatedAt: new Date().toISOString() })
-      setAllRates(rates) // Store all rates for the "add" dialog
+      // Update all rate values without changing the tracked list
+      updateSettings({
+        exchangeRates: { ...settings.exchangeRates, ...rates },
+        exchangeRatesUpdatedAt: new Date().toISOString(),
+      })
+      setAllRates(rates)
     } catch {
       alert('取得匯率失敗，請稍後再試')
     } finally {
@@ -62,26 +73,17 @@ export function SettingsPage() {
     }
   }
 
-  const handleUpdateRate = (code: string, newRate: string) => {
-    const rate = parseFloat(newRate)
-    if (isNaN(rate) || rate <= 0) return
-    updateSettings({
-      exchangeRates: { ...settings.exchangeRates, [code]: rate },
-    })
-  }
-
   const handleRemoveCurrency = (code: string) => {
-    const newRates = { ...settings.exchangeRates }
-    delete newRates[code]
-    updateSettings({ exchangeRates: newRates })
+    saveTrackedList(trackedList.filter((c) => c !== code))
   }
 
-  const handleAddCurrency = async (code: string) => {
-    // If we have fetched rates, use them; otherwise set to 1
-    const rate = allRates[code] || settings.exchangeRates[code] || 1
-    updateSettings({
-      exchangeRates: { ...settings.exchangeRates, [code]: rate },
-    })
+  const handleAddCurrency = (code: string) => {
+    if (!trackedList.includes(code)) {
+      saveTrackedList([...trackedList, code])
+    }
+    if (!settings.exchangeRates[code] && allRates[code]) {
+      updateSettings({ exchangeRates: { ...settings.exchangeRates, [code]: allRates[code] } })
+    }
     setShowAddCurrency(false)
   }
 
@@ -108,8 +110,8 @@ export function SettingsPage() {
     { value: 'light' as const, label: '亮色', icon: faSun },
   ]
 
-  const trackedCurrencies = Object.entries(settings.exchangeRates)
-    .filter(([code]) => code !== settings.defaultCurrency)
+  const trackedCurrencies = trackedList
+    .map((code) => [code, settings.exchangeRates[code] || 0] as [string, number])
     .sort(([a], [b]) => {
       const aIdx = CURRENCY_WHITELIST.indexOf(a)
       const bIdx = CURRENCY_WHITELIST.indexOf(b)
@@ -119,10 +121,9 @@ export function SettingsPage() {
       return a.localeCompare(b)
     })
 
-  // Currencies available to add (from API rates, not already tracked)
-  const availableToAdd = Object.keys(allRates)
-    .filter((code) => code !== settings.defaultCurrency && !settings.exchangeRates[code])
-    .sort()
+  const availableToAdd = Object.keys(allRates).length > 0
+    ? Object.keys(allRates).filter((code) => code !== settings.defaultCurrency && !trackedList.includes(code)).sort()
+    : CURRENCY_WHITELIST.filter((c) => c !== settings.defaultCurrency && !trackedList.includes(c))
 
   return (
     <div className="page settings-page">
@@ -177,7 +178,7 @@ export function SettingsPage() {
       {/* Exchange Rates */}
       <section className="settings-section">
         <div style={{ display: 'flex', alignItems: 'center', marginBottom: '0.75rem' }}>
-          <h2 style={{ margin: 0 }}>匯率管理</h2>
+          <h2 style={{ margin: 0 }}>匯率</h2>
           <button
             className="btn btn-sm btn-secondary"
             onClick={handleFetchRates}
@@ -209,20 +210,57 @@ export function SettingsPage() {
           {trackedCurrencies.map(([code, rate]) => (
             <div key={code} className="rate-item">
               <span className="rate-code">{code}</span>
-              <input
-                type="number"
-                className="rate-input"
-                defaultValue={rate}
-                step="any"
-                onBlur={(e) => handleUpdateRate(code, e.target.value)}
-              />
-              <button
-                className="btn-icon btn-delete"
-                onClick={() => handleRemoveCurrency(code)}
-                title="移除"
-              >
-                <FontAwesomeIcon icon={faXmark} />
-              </button>
+              {editingRate === code ? (
+                <>
+                  <input
+                    type="number"
+                    inputMode="decimal"
+                    className="rate-edit-input"
+                    value={editingRateValue}
+                    onChange={(e) => setEditingRateValue(e.target.value)}
+                    autoFocus
+                  />
+                  <button
+                    className="btn-icon"
+                    onClick={() => setEditingRate(null)}
+                    title="取消"
+                  >
+                    <FontAwesomeIcon icon={faTimes} />
+                  </button>
+                  <button
+                    className="btn-icon btn-save"
+                    onClick={() => {
+                      const val = parseFloat(editingRateValue)
+                      if (!isNaN(val) && val > 0) {
+                        updateSettings({ exchangeRates: { ...settings.exchangeRates, [code]: val } })
+                      }
+                      setEditingRate(null)
+                    }}
+                    title="儲存"
+                  >
+                    <FontAwesomeIcon icon={faCheck} />
+                  </button>
+                </>
+              ) : (
+                <>
+                  <span
+                    className="rate-value rate-value-editable"
+                    onClick={() => {
+                      setEditingRate(code)
+                      setEditingRateValue(String(rate))
+                    }}
+                  >
+                    {rate}
+                  </span>
+                  <button
+                    className="btn-icon btn-delete"
+                    onClick={() => handleRemoveCurrency(code)}
+                    title="移除"
+                  >
+                    <FontAwesomeIcon icon={faTrash} />
+                  </button>
+                </>
+              )}
             </div>
           ))}
           {trackedCurrencies.length === 0 && (
@@ -232,34 +270,49 @@ export function SettingsPage() {
       </section>
 
       {/* Add Currency Dialog */}
-      {showAddCurrency && (
-        <div className="dialog-overlay" onClick={() => setShowAddCurrency(false)}>
-          <div className="dialog" onClick={(e) => e.stopPropagation()}>
-            <h3>新增追蹤幣別</h3>
-            {availableToAdd.length === 0 && Object.keys(allRates).length === 0 ? (
-              <p className="settings-hint">載入幣別中...</p>
-            ) : (
-              <div style={{ maxHeight: '300px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-                {(availableToAdd.length > 0 ? availableToAdd : CURRENCY_WHITELIST.filter(c => c !== settings.defaultCurrency && !settings.exchangeRates[c])).map((code) => (
-                  <button
-                    key={code}
-                    className="btn btn-secondary"
-                    onClick={() => handleAddCurrency(code)}
-                    style={{ justifyContent: 'flex-start' }}
-                  >
-                    {code} {allRates[code] ? `(${allRates[code].toFixed(4)})` : ''}
-                  </button>
-                ))}
+      {showAddCurrency && (() => {
+        const q = currencySearch.toUpperCase()
+        const filtered = availableToAdd.filter((code) => code.includes(q))
+        return (
+          <div className="dialog-overlay" onClick={() => { setShowAddCurrency(false); setCurrencySearch('') }}>
+            <div className="dialog" onClick={(e) => e.stopPropagation()}>
+              <h3>新增追蹤幣別</h3>
+              <div className="form-group">
+                <input
+                  type="text"
+                  value={currencySearch}
+                  onChange={(e) => setCurrencySearch(e.target.value)}
+                  placeholder="搜尋幣別..."
+                  autoFocus
+                />
               </div>
-            )}
-            <div className="dialog-actions">
-              <button className="btn btn-secondary" onClick={() => setShowAddCurrency(false)}>
-                關閉
-              </button>
+              <div style={{ height: '300px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+              {filtered.length === 0 ? (
+                <p className="settings-hint">沒有符合的幣別</p>
+              ) : (
+                <>
+                  {filtered.map((code) => (
+                    <button
+                      key={code}
+                      className="btn btn-secondary"
+                      onClick={() => { handleAddCurrency(code); setCurrencySearch('') }}
+                      style={{ justifyContent: 'flex-start' }}
+                    >
+                      {code} {allRates[code] ? `(${allRates[code].toFixed(4)})` : ''}
+                    </button>
+                  ))}
+                </>
+              )}
+              </div>
+              <div className="dialog-actions">
+                <button className="btn btn-secondary" onClick={() => { setShowAddCurrency(false); setCurrencySearch('') }}>
+                  關閉
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )
+      })()}
 
       {/* Theme */}
       <section className="settings-section">
@@ -310,10 +363,12 @@ export function SettingsPage() {
 
       {/* Identity */}
       <section className="settings-section">
-        <h2>目前身份: {state.identity}</h2>
-        <button className="btn btn-warning" onClick={handleSwitchIdentity}>
-          切換身份
-        </button>
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+          <h2 style={{ margin: 0 }}>目前身份: {state.identity}</h2>
+          <button className="btn btn-sm btn-warning" onClick={handleSwitchIdentity} style={{ marginLeft: 'auto' }}>
+            切換身份
+          </button>
+        </div>
       </section>
     </div>
   )

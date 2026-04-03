@@ -89,8 +89,8 @@ export function Templates() {
     <div className="page templates-page">
       <header className="page-header">
         <h1>模板</h1>
-        <button className="btn btn-primary" onClick={() => openTemplateForm()}>
-          <FontAwesomeIcon icon={faPlus} /> 新增模板
+        <button className="btn btn-sm btn-primary" onClick={() => openTemplateForm()} title="新增模板">
+          <FontAwesomeIcon icon={faPlus} />
         </button>
       </header>
 
