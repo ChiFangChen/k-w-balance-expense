@@ -142,12 +142,17 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     }
   }, [])
 
-  // Fetch exchange rates on first launch
+  // Fetch exchange rates on first launch — only for whitelisted currencies
   useEffect(() => {
     if (Object.keys(state.settings.exchangeRates).length === 0) {
+      const CURRENCY_WHITELIST = ['JPY', 'THB', 'USD', 'CNY']
       fetchExchangeRates(state.settings.defaultCurrency)
         .then((rates) => {
-          dispatch({ type: 'UPDATE_SETTINGS', settings: { exchangeRates: rates } })
+          const filtered: Record<string, number> = {}
+          for (const code of CURRENCY_WHITELIST) {
+            if (rates[code]) filtered[code] = rates[code]
+          }
+          dispatch({ type: 'UPDATE_SETTINGS', settings: { exchangeRates: filtered } })
         })
         .catch(() => {
           // Silently fail — user can manually set rates
