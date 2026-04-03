@@ -9,6 +9,8 @@ export const defaultSettings: Settings = {
   defaultCurrency: 'TWD',
   exchangeRates: {},
   theme: 'light',
+  colorKiki: '#FF6B9D',
+  colorWayne: '#4ECDC4',
 }
 
 export const defaultState: AppState = {

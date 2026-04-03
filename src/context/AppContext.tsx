@@ -131,8 +131,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         const unsub2 = subscribeToTemplates(db, (templates) => dispatch({ type: 'SET_TEMPLATES', templates }))
         const unsub3 = subscribeToOperationLogs(db, (logs) => dispatch({ type: 'SET_OPERATION_LOGS', logs }))
         const unsub4 = subscribeToSettings(db, (remoteSettings) => {
-          // Preserve local theme when syncing settings from Firebase
-          const { theme: _, ...rest } = remoteSettings
+          // Preserve local-only settings when syncing from Firebase
+          const { theme: _, colorKiki: _ck, colorWayne: _cw, ...rest } = remoteSettings
           dispatch({ type: 'UPDATE_SETTINGS', settings: rest })
         })
         return () => {
@@ -205,9 +205,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const updateSettingsAction = useCallback((settings: Partial<Settings>) => {
     dispatch({ type: 'UPDATE_SETTINGS', settings })
-    // Sync settings to Firebase, but exclude theme (local-only preference)
+    // Sync settings to Firebase, but exclude local-only preferences
     const merged = { ...state.settings, ...settings }
-    const { theme: _, ...settingsToSync } = merged
+    const { theme: _, colorKiki: _ck, colorWayne: _cw, ...settingsToSync } = merged
     if (dbRef.current) syncSettings(dbRef.current, settingsToSync as Settings)
   }, [state.settings])
 

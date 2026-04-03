@@ -268,6 +268,29 @@ export function SettingsPage() {
         </div>
       </section>
 
+      {/* Colors */}
+      <section className="settings-section">
+        <h2>代表色</h2>
+        <div className="color-pickers">
+          <div className="color-picker-item">
+            <label>Kiki</label>
+            <input
+              type="color"
+              value={settings.colorKiki}
+              onChange={(e) => updateSettings({ colorKiki: e.target.value })}
+            />
+          </div>
+          <div className="color-picker-item">
+            <label>Wayne</label>
+            <input
+              type="color"
+              value={settings.colorWayne}
+              onChange={(e) => updateSettings({ colorWayne: e.target.value })}
+            />
+          </div>
+        </div>
+      </section>
+
       {/* Identity */}
       <section className="settings-section">
         <h2>目前身份: {state.identity}</h2>

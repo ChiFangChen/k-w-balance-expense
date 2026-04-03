@@ -9,6 +9,13 @@ import { OperationLogs } from './pages/OperationLogs'
 import { NavBar } from './components/NavBar'
 import './App.css'
 
+function hexToRgb(hex: string) {
+  const r = parseInt(hex.slice(1, 3), 16)
+  const g = parseInt(hex.slice(3, 5), 16)
+  const b = parseInt(hex.slice(5, 7), 16)
+  return { r, g, b }
+}
+
 function AppContent() {
   const { state } = useApp()
 
@@ -16,9 +23,20 @@ function AppContent() {
     return <IdentitySelect />
   }
 
+  const kikiRgb = hexToRgb(state.settings.colorKiki)
+  const wayneRgb = hexToRgb(state.settings.colorWayne)
+
   return (
     <BrowserRouter basename="/k-w-balance-expense">
-      <div className={`app theme-${state.settings.theme}`}>
+      <div
+        className={`app theme-${state.settings.theme}`}
+        style={{
+          '--color-kiki': state.settings.colorKiki,
+          '--color-kiki-light': `rgba(${kikiRgb.r}, ${kikiRgb.g}, ${kikiRgb.b}, 0.15)`,
+          '--color-wayne': state.settings.colorWayne,
+          '--color-wayne-light': `rgba(${wayneRgb.r}, ${wayneRgb.g}, ${wayneRgb.b}, 0.15)`,
+        } as React.CSSProperties}
+      >
         <div className="app-content">
           <Routes>
             <Route path="/" element={<Dashboard />} />
