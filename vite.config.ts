@@ -16,7 +16,7 @@ export default defineConfig({
         name: 'KW Balance',
         short_name: 'KW Balance',
         description: 'Kiki & Wayne 共同記帳',
-        theme_color: '#4A90D9',
+        theme_color: '#f8f6f4',
         background_color: '#ffffff',
         display: 'standalone',
         scope: '/k-w-balance-expense/',
