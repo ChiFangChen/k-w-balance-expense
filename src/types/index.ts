@@ -46,6 +46,7 @@ export interface Settings {
   ratioKiki: number // default 33
   defaultCurrency: string // default 'TWD'
   exchangeRates: Record<string, number> // e.g. { USD: 31.5, JPY: 0.22 } — rate means 1 unit of foreign = X TWD
+  exchangeRatesUpdatedAt?: string // ISO string — last time rates were synced
   theme: 'dark' | 'light'
   colorKiki: string // default '#FF6B9D'
   colorWayne: string // default '#4ECDC4'

@@ -53,7 +53,7 @@ export function SettingsPage() {
           updatedRates[code] = rates[code]
         }
       }
-      updateSettings({ exchangeRates: { ...settings.exchangeRates, ...updatedRates } })
+      updateSettings({ exchangeRates: { ...settings.exchangeRates, ...updatedRates }, exchangeRatesUpdatedAt: new Date().toISOString() })
       setAllRates(rates) // Store all rates for the "add" dialog
     } catch {
       alert('取得匯率失敗，請稍後再試')
@@ -177,23 +177,25 @@ export function SettingsPage() {
       {/* Exchange Rates */}
       <section className="settings-section">
         <h2>匯率管理</h2>
-        <p className="settings-hint">1 外幣 = ? {settings.defaultCurrency}</p>
-        <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.75rem' }}>
-          <button
-            className="btn btn-secondary"
-            onClick={handleFetchRates}
-            disabled={loadingRates}
-            style={{ flex: 1 }}
-          >
-            <FontAwesomeIcon icon={faRotate} spin={loadingRates} />
-            {loadingRates ? ' 取得中...' : ' 更新匯率'}
-          </button>
-          <button
-            className="btn btn-primary"
-            onClick={handleOpenAddCurrency}
-          >
-            <FontAwesomeIcon icon={faPlus} /> 新增
-          </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.75rem' }}>
+          <p className="settings-hint" style={{ margin: 0 }}>1 外幣 = ? {settings.defaultCurrency}</p>
+          <div style={{ display: 'flex', gap: '0.5rem', marginLeft: 'auto' }}>
+            <button
+              className="btn btn-sm btn-secondary"
+              onClick={handleFetchRates}
+              disabled={loadingRates}
+            >
+              <FontAwesomeIcon icon={faRotate} spin={loadingRates} style={{ marginRight: '0.25rem' }} />
+              {loadingRates ? '取得中...' : '同步匯率'}
+            </button>
+            <button
+              className="btn btn-sm btn-primary"
+              onClick={handleOpenAddCurrency}
+            >
+              <FontAwesomeIcon icon={faPlus} style={{ marginRight: '0.25rem' }} />
+              新增
+            </button>
+          </div>
         </div>
 
         <div className="rate-list">
@@ -220,6 +222,11 @@ export function SettingsPage() {
             <div className="empty-state" style={{ padding: '1rem 0' }}>尚未追蹤任何外幣</div>
           )}
         </div>
+        {settings.exchangeRatesUpdatedAt && (
+          <p className="settings-hint" style={{ marginTop: '0.5rem', marginBottom: 0, textAlign: 'right' }}>
+            上次同步: {new Date(settings.exchangeRatesUpdatedAt).toLocaleString('zh-TW', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+          </p>
+        )}
       </section>
 
       {/* Add Currency Dialog */}
