@@ -17,14 +17,28 @@ export function SettingsPage() {
   const [showAddCurrency, setShowAddCurrency] = useState(false)
   const [allRates, setAllRates] = useState<Record<string, number>>({})
 
-  const handleRatioSave = () => {
+  const handleWayneChange = (value: string) => {
+    setRatioWayne(value)
+    const w = parseInt(value)
+    if (!isNaN(w) && w >= 0 && w <= 100) {
+      setRatioKiki((100 - w).toString())
+    }
+  }
+
+  const handleKikiChange = (value: string) => {
+    setRatioKiki(value)
+    const k = parseInt(value)
+    if (!isNaN(k) && k >= 0 && k <= 100) {
+      setRatioWayne((100 - k).toString())
+    }
+  }
+
+  const handleRatioBlur = () => {
     const w = parseInt(ratioWayne)
     const k = parseInt(ratioKiki)
-    if (isNaN(w) || isNaN(k) || w + k !== 100) {
-      alert('比例總和必須為 100')
-      return
+    if (!isNaN(w) && !isNaN(k) && w + k === 100 && w >= 0 && k >= 0) {
+      updateSettings({ ratioWayne: w, ratioKiki: k })
     }
-    updateSettings({ ratioWayne: w, ratioKiki: k })
   }
 
   const handleFetchRates = async () => {
@@ -125,7 +139,8 @@ export function SettingsPage() {
             <input
               type="number"
               value={ratioWayne}
-              onChange={(e) => setRatioWayne(e.target.value)}
+              onChange={(e) => handleWayneChange(e.target.value)}
+              onBlur={handleRatioBlur}
               min="0"
               max="100"
             />
@@ -135,15 +150,13 @@ export function SettingsPage() {
             <input
               type="number"
               value={ratioKiki}
-              onChange={(e) => setRatioKiki(e.target.value)}
+              onChange={(e) => handleKikiChange(e.target.value)}
+              onBlur={handleRatioBlur}
               min="0"
               max="100"
             />
           </div>
         </div>
-        <button className="btn btn-primary" onClick={handleRatioSave} style={{ marginTop: '0.75rem' }}>
-          儲存
-        </button>
       </section>
 
       {/* Default Currency */}
