@@ -32,14 +32,14 @@ export function OperationLogs() {
             <div className="log-details">
               <div className="log-before">
                 <span className="log-label">之前</span>
-                <span>K: ${log.beforeKiki.toLocaleString()}</span>
-                <span>W: ${log.beforeWayne.toLocaleString()}</span>
+                <span>K: ${Math.ceil(log.beforeKiki).toLocaleString()}</span>
+                <span>W: ${Math.ceil(log.beforeWayne).toLocaleString()}</span>
               </div>
               <div className="log-arrow">→</div>
               <div className="log-after">
                 <span className="log-label">之後</span>
-                <span>K: ${log.afterKiki.toLocaleString()}</span>
-                <span>W: ${log.afterWayne.toLocaleString()}</span>
+                <span>K: ${Math.ceil(log.afterKiki).toLocaleString()}</span>
+                <span>W: ${Math.ceil(log.afterWayne).toLocaleString()}</span>
               </div>
             </div>
           </div>

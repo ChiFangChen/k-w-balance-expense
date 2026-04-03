@@ -107,7 +107,7 @@ export function Templates() {
               <div>
                 <div className="template-item-name">{template.item}</div>
                 <div className="template-amount">
-                  ${template.amount.toLocaleString()} {template.currency}
+                  ${Math.ceil(template.amount).toLocaleString()} {template.currency}
                 </div>
               </div>
             </div>

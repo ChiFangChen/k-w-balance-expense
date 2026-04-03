@@ -105,11 +105,11 @@ export function Expenses() {
             </div>
             <div className="expense-right">
               <div className="expense-amount">
-                ${expense.amount.toLocaleString()} {expense.currency}
+                ${Math.ceil(expense.amount).toLocaleString()} {expense.currency}
               </div>
               {expense.currency !== settings.defaultCurrency && (
                 <div className="expense-converted">
-                  ≈ ${expense.convertedAmount.toLocaleString()} {settings.defaultCurrency}
+                  ≈ ${Math.ceil(expense.convertedAmount).toLocaleString()} {settings.defaultCurrency}
                 </div>
               )}
               <button

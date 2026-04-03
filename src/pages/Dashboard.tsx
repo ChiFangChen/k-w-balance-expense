@@ -80,26 +80,26 @@ export function Dashboard() {
       <div className="totals-row">
         <div className="total-card kiki-card">
           <div className="total-label">Kiki</div>
-          <div className="total-amount">${totals.kiki.toLocaleString()}</div>
+          <div className="total-amount">${Math.ceil(totals.kiki).toLocaleString()}</div>
           <div className="total-ratio">{ratio.kiki}%</div>
         </div>
         <div className="total-card wayne-card">
           <div className="total-label">Wayne</div>
-          <div className="total-amount">${totals.wayne.toLocaleString()}</div>
+          <div className="total-amount">${Math.ceil(totals.wayne).toLocaleString()}</div>
           <div className="total-ratio">{ratio.wayne}%</div>
         </div>
       </div>
 
       {/* Total */}
       <div className="grand-total">
-        總計: ${total.toLocaleString()} {settings.defaultCurrency}
+        總計: ${Math.ceil(total).toLocaleString()} {settings.defaultCurrency}
       </div>
 
       {/* Gap */}
       {gap.person && (
         <div className="gap-info">
           <FontAwesomeIcon icon={faLightbulb} style={{ marginRight: '0.5rem', color: 'var(--color-warning)' }} />
-          {gap.person} 還需要花 <strong>${gap.amount.toLocaleString()}</strong> {settings.defaultCurrency} 才能達到目標比例
+          {gap.person} 還需要花 <strong>${Math.ceil(gap.amount).toLocaleString()}</strong> {settings.defaultCurrency} 才能平衡
         </div>
       )}
 
@@ -132,7 +132,7 @@ export function Dashboard() {
       <ConfirmDialog
         isOpen={showBalanceConfirm}
         title="平衡帳目"
-        message={`將等比例縮小帳目金額，Kiki: $${totals.kiki.toLocaleString()}, Wayne: $${totals.wayne.toLocaleString()}`}
+        message={`將等比例縮小帳目金額，Kiki: $${Math.ceil(totals.kiki).toLocaleString()}, Wayne: $${Math.ceil(totals.wayne).toLocaleString()}`}
         confirmText="執行平衡"
         onConfirm={() => {
           performBalanceAction()
