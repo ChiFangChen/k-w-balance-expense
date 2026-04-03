@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useApp } from '../context/AppContext'
-import { Person, Expense } from '../types'
+import type { Person, Expense } from '../types'
 import { convertToDefault } from '../utils/currency'
 
 interface ExpenseFormProps {

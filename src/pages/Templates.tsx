@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useApp } from '../context/AppContext'
-import { Template, Person } from '../types'
+import type { Template, Person } from '../types'
 import { ExpenseForm } from '../components/ExpenseForm'
 import { convertToDefault } from '../utils/currency'
 

@@ -2,7 +2,7 @@ import { useApp } from '../context/AppContext'
 
 export function OperationLogs() {
   const { state } = useApp()
-  const { operationLogs, settings } = state
+  const { operationLogs } = state
 
   const formatDate = (iso: string) => {
     const d = new Date(iso)

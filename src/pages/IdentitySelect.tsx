@@ -1,5 +1,5 @@
 import { useApp } from '../context/AppContext'
-import { Person } from '../types'
+
 
 export function IdentitySelect() {
   const { setIdentity } = useApp()

@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react'
 import { useApp } from '../context/AppContext'
 import { ExpenseForm } from '../components/ExpenseForm'
-import { Person, Expense } from '../types'
+import type { Person, Expense } from '../types'
 
 export function Expenses() {
   const { state, deleteExpense } = useApp()

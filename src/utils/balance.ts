@@ -1,4 +1,4 @@
-import { Expense, OperationLog, Person, Settings } from '../types'
+import type { Expense, OperationLog, Person, Settings } from '../types'
 
 export function calculateTotals(expenses: Expense[]): { kiki: number; wayne: number } {
   let kiki = 0

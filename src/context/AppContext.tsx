@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useReducer, useCallback, useRef } from 'react'
-import { AppState, Expense, Template, Settings, Person, OperationLog } from '../types'
-import { loadState, saveState, defaultSettings } from '../utils/storage'
+import type { AppState, Expense, Template, Settings, Person, OperationLog } from '../types'
+import { loadState, saveState } from '../utils/storage'
 import { generateId } from '../utils/id'
 import { performBalance, calculateTotals } from '../utils/balance'
 import { fetchExchangeRates } from '../utils/currency'

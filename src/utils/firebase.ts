@@ -1,4 +1,4 @@
-import { initializeApp, FirebaseApp } from 'firebase/app'
+import { initializeApp, type FirebaseApp } from 'firebase/app'
 import {
   getFirestore,
   collection,
@@ -9,7 +9,7 @@ import {
   Firestore,
   writeBatch,
 } from 'firebase/firestore'
-import { AppState, Expense, Template, OperationLog, Settings } from '../types'
+import type { Expense, Template, OperationLog, Settings } from '../types'
 
 // Firebase config — user needs to fill these in from Firebase Console
 const firebaseConfig = {

@@ -1,4 +1,4 @@
-import { AppState, Settings } from '../types'
+import type { AppState, Settings } from '../types'
 
 const STORAGE_KEY = 'kw-balance-data'
 const IDENTITY_KEY = 'kw-balance-identity'

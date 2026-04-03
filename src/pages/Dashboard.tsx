@@ -5,7 +5,7 @@ import { useApp } from '../context/AppContext'
 import { calculateTotals, calculateCurrentRatio, calculateGap } from '../utils/balance'
 import { ConfirmDialog } from '../components/ConfirmDialog'
 import { ExpenseForm } from '../components/ExpenseForm'
-import { Person } from '../types'
+import type { Person } from '../types'
 
 ChartJS.register(ArcElement, Tooltip, Legend)
 
