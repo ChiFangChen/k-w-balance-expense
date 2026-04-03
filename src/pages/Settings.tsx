@@ -23,8 +23,7 @@ export function SettingsPage() {
   const TRACKED_KEY = 'kw-tracked-currencies'
   const [trackedList, setTrackedList] = useState<string[]>(() => {
     const saved = localStorage.getItem(TRACKED_KEY)
-    if (saved) return JSON.parse(saved)
-    return Object.keys(settings.exchangeRates).filter((c) => c !== settings.defaultCurrency)
+    return saved ? JSON.parse(saved) : []
   })
 
   const saveTrackedList = (list: string[]) => {
