@@ -22,6 +22,14 @@ export interface Template {
 
 export type OperationType = 'balance' | 'reset'
 
+export interface SnapshotExpense {
+  payer: Person
+  item: string
+  amount: number
+  currency: string
+  convertedAmount: number
+}
+
 export interface OperationLog {
   id: string
   type: OperationType
@@ -30,6 +38,7 @@ export interface OperationLog {
   beforeWayne: number
   afterKiki: number
   afterWayne: number
+  snapshot?: SnapshotExpense[] // expenses at the time of the operation
 }
 
 export interface Settings {

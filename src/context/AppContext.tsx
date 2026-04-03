@@ -212,8 +212,15 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   }, [state.settings])
 
   const performBalanceAction = useCallback(() => {
+    const snapshot = state.expenses.map((e) => ({
+      payer: e.payer,
+      item: e.item,
+      amount: e.amount,
+      currency: e.currency,
+      convertedAmount: e.convertedAmount,
+    }))
     const result = performBalance(state.expenses, state.settings)
-    const log: OperationLog = { ...result.log, id: generateId() }
+    const log: OperationLog = { ...result.log, id: generateId(), snapshot }
     dispatch({ type: 'BALANCE', expenses: result.newExpenses, log })
     if (dbRef.current) {
       batchReplaceExpenses(dbRef.current, result.newExpenses)
@@ -222,6 +229,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   }, [state.expenses, state.settings])
 
   const performResetAction = useCallback(() => {
+    const snapshot = state.expenses.map((e) => ({
+      payer: e.payer,
+      item: e.item,
+      amount: e.amount,
+      currency: e.currency,
+      convertedAmount: e.convertedAmount,
+    }))
     const totals = calculateTotals(state.expenses)
     const now = new Date().toISOString()
     const log: OperationLog = {
@@ -232,6 +246,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       beforeWayne: totals.wayne,
       afterKiki: 0,
       afterWayne: 0,
+      snapshot,
     }
     dispatch({ type: 'RESET', log })
     if (dbRef.current) {
