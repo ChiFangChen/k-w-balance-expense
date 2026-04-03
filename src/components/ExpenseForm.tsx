@@ -25,7 +25,7 @@ export function ExpenseForm({ defaultPayer, editingExpense, onClose }: ExpenseFo
   )
   const [saveAsTemplate, setSaveAsTemplate] = useState(false)
 
-  const currencyOptions = [settings.defaultCurrency, ...Object.keys(settings.exchangeRates).filter((c) => c !== settings.defaultCurrency).sort()]
+  const currencyOptions = ['TWD', ...Object.keys(settings.exchangeRates).filter((c) => c !== 'TWD').sort()]
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
