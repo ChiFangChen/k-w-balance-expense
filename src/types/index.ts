@@ -37,7 +37,7 @@ export interface Settings {
   ratioKiki: number // default 33
   defaultCurrency: string // default 'TWD'
   exchangeRates: Record<string, number> // e.g. { USD: 31.5, JPY: 0.22 } — rate means 1 unit of foreign = X TWD
-  theme: 'dark' | 'light' | 'cute'
+  theme: 'dark' | 'light'
 }
 
 export interface AppState {

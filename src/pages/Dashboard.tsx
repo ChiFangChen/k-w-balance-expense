@@ -56,6 +56,11 @@ export function Dashboard() {
         <span className="identity-badge">{state.identity}</span>
       </header>
 
+      {/* Target Ratio */}
+      <div className="target-ratio">
+        目標比例: Kiki {settings.ratioKiki}% / Wayne {settings.ratioWayne}%
+      </div>
+
       {/* Quick Add Buttons */}
       <div className="quick-add">
         <button className="btn quick-add-btn kiki-color" onClick={() => openForm('Kiki')}>
@@ -88,11 +93,6 @@ export function Dashboard() {
         總計: ${total.toLocaleString()} {settings.defaultCurrency}
       </div>
 
-      {/* Target Ratio */}
-      <div className="target-ratio">
-        目標比例: Kiki {settings.ratioKiki}% / Wayne {settings.ratioWayne}%
-      </div>
-
       {/* Gap */}
       {gap.person && (
         <div className="gap-info">
@@ -108,7 +108,7 @@ export function Dashboard() {
       )}
 
       {/* Action Buttons */}
-      <div className="action-buttons">
+      <div className="action-buttons gap-3">
         <button
           className="btn btn-warning"
           onClick={() => setShowBalanceConfirm(true)}

@@ -3,6 +3,8 @@ import { useApp } from '../context/AppContext'
 import type { Person, Expense } from '../types'
 import { convertToDefault } from '../utils/currency'
 
+const CURRENCY_WHITELIST = ['TWD', 'JPY', 'THB', 'USD', 'CNY']
+
 interface ExpenseFormProps {
   defaultPayer?: Person
   editingExpense?: Expense
@@ -10,10 +12,10 @@ interface ExpenseFormProps {
 }
 
 export function ExpenseForm({ defaultPayer, editingExpense, onClose }: ExpenseFormProps) {
-  const { state, addExpense, updateExpense } = useApp()
+  const { state, addExpense, updateExpense, addTemplate } = useApp()
   const { settings } = state
 
-  const [payer, setPayer] = useState<Person>(editingExpense?.payer || defaultPayer || 'Kiki')
+  const [payer, setPayer] = useState<Person | undefined>(editingExpense?.payer || defaultPayer)
   const [item, setItem] = useState(editingExpense?.item || '')
   const [amount, setAmount] = useState(editingExpense?.amount?.toString() || '')
   const [currency, setCurrency] = useState(editingExpense?.currency || settings.defaultCurrency)
@@ -22,13 +24,12 @@ export function ExpenseForm({ defaultPayer, editingExpense, onClose }: ExpenseFo
       ? editingExpense.createdAt.slice(0, 16)
       : new Date().toISOString().slice(0, 16)
   )
-
-  const availableCurrencies = [settings.defaultCurrency, ...Object.keys(settings.exchangeRates)]
+  const [saveAsTemplate, setSaveAsTemplate] = useState(false)
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     const numAmount = parseFloat(amount)
-    if (!item.trim() || isNaN(numAmount) || numAmount <= 0) return
+    if (!payer || !item.trim() || isNaN(numAmount) || numAmount <= 0) return
 
     const { convertedAmount, exchangeRate } = convertToDefault(
       numAmount,
@@ -37,7 +38,7 @@ export function ExpenseForm({ defaultPayer, editingExpense, onClose }: ExpenseFo
       settings.exchangeRates
     )
 
-    if (editingExpense) {
+    if (editingExpense && editingExpense.id) {
       updateExpense({
         ...editingExpense,
         payer,
@@ -57,6 +58,15 @@ export function ExpenseForm({ defaultPayer, editingExpense, onClose }: ExpenseFo
         exchangeRate,
         convertedAmount,
       })
+
+      if (saveAsTemplate) {
+        addTemplate({
+          payer,
+          item: item.trim(),
+          amount: numAmount,
+          currency,
+        })
+      }
     }
     onClose()
   }
@@ -72,6 +82,7 @@ export function ExpenseForm({ defaultPayer, editingExpense, onClose }: ExpenseFo
               <button
                 type="button"
                 className={`btn ${payer === 'Kiki' ? 'btn-primary' : 'btn-secondary'}`}
+                style={payer === 'Kiki' ? { background: 'var(--color-kiki)', color: 'white' } : {}}
                 onClick={() => setPayer('Kiki')}
               >
                 Kiki
@@ -79,6 +90,7 @@ export function ExpenseForm({ defaultPayer, editingExpense, onClose }: ExpenseFo
               <button
                 type="button"
                 className={`btn ${payer === 'Wayne' ? 'btn-primary' : 'btn-secondary'}`}
+                style={payer === 'Wayne' ? { background: 'var(--color-wayne)', color: 'white' } : {}}
                 onClick={() => setPayer('Wayne')}
               >
                 Wayne
@@ -113,7 +125,7 @@ export function ExpenseForm({ defaultPayer, editingExpense, onClose }: ExpenseFo
             <div className="form-group">
               <label>幣別</label>
               <select value={currency} onChange={(e) => setCurrency(e.target.value)}>
-                {availableCurrencies.map((c) => (
+                {CURRENCY_WHITELIST.map((c) => (
                   <option key={c} value={c}>{c}</option>
                 ))}
               </select>
@@ -135,11 +147,23 @@ export function ExpenseForm({ defaultPayer, editingExpense, onClose }: ExpenseFo
             />
           </div>
 
+          {!editingExpense && (
+            <label className="flex items-center gap-2 text-sm cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={saveAsTemplate}
+                onChange={(e) => setSaveAsTemplate(e.target.checked)}
+                className="w-4 h-4 rounded border-border"
+              />
+              同時儲存為模板
+            </label>
+          )}
+
           <div className="dialog-actions">
             <button type="button" className="btn btn-secondary" onClick={onClose}>
               取消
             </button>
-            <button type="submit" className="btn btn-primary">
+            <button type="submit" className="btn btn-primary" disabled={!payer}>
               {editingExpense ? '更新' : '新增'}
             </button>
           </div>

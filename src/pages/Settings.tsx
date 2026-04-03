@@ -10,8 +10,7 @@ export function SettingsPage() {
   const [ratioWayne, setRatioWayne] = useState(settings.ratioWayne.toString())
   const [ratioKiki, setRatioKiki] = useState(settings.ratioKiki.toString())
   const [loadingRates, setLoadingRates] = useState(false)
-  const [newCurrencyCode, setNewCurrencyCode] = useState('')
-  const [newCurrencyRate, setNewCurrencyRate] = useState('')
+  const CURRENCY_WHITELIST = ['TWD', 'JPY', 'THB', 'USD', 'CNY']
 
   const handleRatioSave = () => {
     const w = parseInt(ratioWayne)
@@ -35,23 +34,6 @@ export function SettingsPage() {
     }
   }
 
-  const handleAddCurrency = () => {
-    const code = newCurrencyCode.trim().toUpperCase()
-    const rate = parseFloat(newCurrencyRate)
-    if (!code || isNaN(rate) || rate <= 0) return
-    updateSettings({
-      exchangeRates: { ...settings.exchangeRates, [code]: rate },
-    })
-    setNewCurrencyCode('')
-    setNewCurrencyRate('')
-  }
-
-  const handleDeleteCurrency = (code: string) => {
-    const newRates = { ...settings.exchangeRates }
-    delete newRates[code]
-    updateSettings({ exchangeRates: newRates })
-  }
-
   const handleUpdateRate = (code: string, newRate: string) => {
     const rate = parseFloat(newRate)
     if (isNaN(rate) || rate <= 0) return
@@ -68,20 +50,11 @@ export function SettingsPage() {
   const themes = [
     { value: 'dark' as const, label: '🌙 深色簡約' },
     { value: 'light' as const, label: '☀️ 亮色簡約' },
-    { value: 'cute' as const, label: '🎀 可愛風' },
   ]
 
-  // Common currencies to show at top
-  const popularCurrencies = ['USD', 'JPY', 'EUR', 'KRW', 'GBP', 'CNY']
   const displayedRates = Object.entries(settings.exchangeRates)
-    .sort(([a], [b]) => {
-      const aIdx = popularCurrencies.indexOf(a)
-      const bIdx = popularCurrencies.indexOf(b)
-      if (aIdx >= 0 && bIdx >= 0) return aIdx - bIdx
-      if (aIdx >= 0) return -1
-      if (bIdx >= 0) return 1
-      return a.localeCompare(b)
-    })
+    .filter(([code]) => CURRENCY_WHITELIST.includes(code))
+    .sort(([a], [b]) => CURRENCY_WHITELIST.indexOf(a) - CURRENCY_WHITELIST.indexOf(b))
 
   return (
     <div className="page settings-page">
@@ -115,7 +88,7 @@ export function SettingsPage() {
           </div>
         </div>
         <button className="btn btn-primary" onClick={handleRatioSave}>
-          儲存比例
+          儲存
         </button>
       </section>
 
@@ -145,7 +118,7 @@ export function SettingsPage() {
         </button>
 
         <div className="rate-list">
-          {displayedRates.slice(0, 20).map(([code, rate]) => (
+          {displayedRates.map(([code, rate]) => (
             <div key={code} className="rate-item">
               <span className="rate-code">{code}</span>
               <input
@@ -155,37 +128,8 @@ export function SettingsPage() {
                 step="any"
                 onBlur={(e) => handleUpdateRate(code, e.target.value)}
               />
-              <button
-                className="btn-icon btn-delete"
-                onClick={() => handleDeleteCurrency(code)}
-              >
-                ✕
-              </button>
             </div>
           ))}
-          {displayedRates.length > 20 && (
-            <div className="settings-hint">... 還有 {displayedRates.length - 20} 個幣別</div>
-          )}
-        </div>
-
-        <div className="form-row add-currency">
-          <input
-            type="text"
-            placeholder="幣別代碼"
-            value={newCurrencyCode}
-            onChange={(e) => setNewCurrencyCode(e.target.value)}
-            className="flex-1"
-          />
-          <input
-            type="number"
-            placeholder="匯率"
-            value={newCurrencyRate}
-            onChange={(e) => setNewCurrencyRate(e.target.value)}
-            step="any"
-          />
-          <button className="btn btn-primary" onClick={handleAddCurrency}>
-            +
-          </button>
         </div>
       </section>
 
