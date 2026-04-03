@@ -3,7 +3,6 @@ import { useApp } from '../context/AppContext'
 import type { Person, Expense } from '../types'
 import { convertToDefault } from '../utils/currency'
 
-const CURRENCY_WHITELIST = ['TWD', 'JPY', 'THB', 'USD', 'CNY']
 
 interface ExpenseFormProps {
   defaultPayer?: Person
@@ -25,6 +24,8 @@ export function ExpenseForm({ defaultPayer, editingExpense, onClose }: ExpenseFo
       : new Date().toISOString().slice(0, 16)
   )
   const [saveAsTemplate, setSaveAsTemplate] = useState(false)
+
+  const currencyOptions = [settings.defaultCurrency, ...Object.keys(settings.exchangeRates).filter((c) => c !== settings.defaultCurrency).sort()]
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -127,7 +128,7 @@ export function ExpenseForm({ defaultPayer, editingExpense, onClose }: ExpenseFo
               <div className="form-group">
                 <label>幣別</label>
                 <select value={currency} onChange={(e) => setCurrency(e.target.value)}>
-                  {CURRENCY_WHITELIST.map((c) => (
+                  {currencyOptions.map((c) => (
                     <option key={c} value={c}>{c}</option>
                   ))}
                 </select>

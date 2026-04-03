@@ -6,11 +6,11 @@ import type { Template, Person } from '../types'
 import { ExpenseForm } from '../components/ExpenseForm'
 import { convertToDefault } from '../utils/currency'
 
-const CURRENCY_WHITELIST = ['TWD', 'JPY', 'THB', 'USD', 'CNY']
 
 export function Templates() {
   const { state, addTemplate, updateTemplate, deleteTemplate, addExpense } = useApp()
   const { templates, settings } = state
+  const currencyOptions = [settings.defaultCurrency, ...Object.keys(settings.exchangeRates).filter((c) => c !== settings.defaultCurrency).sort()]
 
   const [showTemplateForm, setShowTemplateForm] = useState(false)
   const [editingTemplate, setEditingTemplate] = useState<Template | undefined>()
@@ -192,7 +192,7 @@ export function Templates() {
               <div className="form-group">
                 <label>幣別</label>
                 <select value={formCurrency} onChange={(e) => setFormCurrency(e.target.value)}>
-                  {CURRENCY_WHITELIST.map((c) => (
+                  {currencyOptions.map((c) => (
                     <option key={c} value={c}>{c}</option>
                   ))}
                 </select>
