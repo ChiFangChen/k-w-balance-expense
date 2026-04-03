@@ -175,7 +175,6 @@ export function Templates() {
                 type="text"
                 value={formItem}
                 onChange={(e) => setFormItem(e.target.value)}
-                placeholder="例如：錢都"
               />
             </div>
             <div className="form-row">
@@ -183,9 +182,9 @@ export function Templates() {
                 <label>金額</label>
                 <input
                   type="number"
+                  inputMode="numeric"
                   value={formAmount}
                   onChange={(e) => setFormAmount(e.target.value)}
-                  placeholder="0"
                   min="0"
                   step="any"
                 />

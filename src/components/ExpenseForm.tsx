@@ -104,7 +104,6 @@ export function ExpenseForm({ defaultPayer, editingExpense, onClose }: ExpenseFo
               type="text"
               value={item}
               onChange={(e) => setItem(e.target.value)}
-              placeholder="例如：錢都"
               required
             />
           </div>
@@ -114,9 +113,9 @@ export function ExpenseForm({ defaultPayer, editingExpense, onClose }: ExpenseFo
               <label>金額</label>
               <input
                 type="number"
+                inputMode="numeric"
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
-                placeholder="0"
                 min="0"
                 step="any"
                 required
