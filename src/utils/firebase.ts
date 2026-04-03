@@ -11,14 +11,13 @@ import {
 } from 'firebase/firestore'
 import type { Expense, Template, OperationLog, Settings } from '../types'
 
-// Firebase config — user needs to fill these in from Firebase Console
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || '',
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || '',
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || '',
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || '',
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || '',
-  appId: import.meta.env.VITE_FIREBASE_APP_ID || '',
+  apiKey: 'AIzaSyCCCjlZZAUnoAxtv5km6Xw820YzTgJDix4',
+  authDomain: 'k-w-balance-expense.firebaseapp.com',
+  projectId: 'k-w-balance-expense',
+  storageBucket: 'k-w-balance-expense.firebasestorage.app',
+  messagingSenderId: '989568266987',
+  appId: '1:989568266987:web:fad2d50a0f5cef96e9c4ae',
 }
 
 let app: FirebaseApp | null = null
