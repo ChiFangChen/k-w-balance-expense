@@ -168,7 +168,7 @@ export function SettingsPage() {
             value={settings.defaultCurrency}
             onChange={(e) => updateSettings({ defaultCurrency: e.target.value })}
           >
-            {[settings.defaultCurrency, ...trackedList.filter((c) => c !== settings.defaultCurrency)].map((c) => (
+            {['TWD', ...trackedList.filter((c) => c !== 'TWD')].map((c) => (
               <option key={c} value={c}>{c}</option>
             ))}
           </select>

@@ -10,7 +10,7 @@ import { convertToDefault } from '../utils/currency'
 export function Templates() {
   const { state, addTemplate, updateTemplate, deleteTemplate, addExpense } = useApp()
   const { templates, settings } = state
-  const currencyOptions = [settings.defaultCurrency, ...Object.keys(settings.exchangeRates).filter((c) => c !== settings.defaultCurrency).sort()]
+  const currencyOptions = ['TWD', ...Object.keys(settings.exchangeRates).filter((c) => c !== 'TWD').sort()]
 
   const [showTemplateForm, setShowTemplateForm] = useState(false)
   const [editingTemplate, setEditingTemplate] = useState<Template | undefined>()
