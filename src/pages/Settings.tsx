@@ -162,16 +162,9 @@ export function SettingsPage() {
 
       {/* Default Currency */}
       <section className="settings-section">
-        <h2>預設幣別</h2>
-        <div className="form-group">
-          <select
-            value={settings.defaultCurrency}
-            onChange={(e) => updateSettings({ defaultCurrency: e.target.value })}
-          >
-            {['TWD', ...trackedList.filter((c) => c !== 'TWD')].map((c) => (
-              <option key={c} value={c}>{c}</option>
-            ))}
-          </select>
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+          <h2 style={{ margin: 0 }}>主幣別</h2>
+          <span className="settings-value" style={{ marginLeft: 'auto' }}>TWD</span>
         </div>
       </section>
 

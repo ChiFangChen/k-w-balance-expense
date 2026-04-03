@@ -17,7 +17,7 @@ export function ExpenseForm({ defaultPayer, editingExpense, onClose }: ExpenseFo
   const [payer, setPayer] = useState<Person | undefined>(editingExpense?.payer || defaultPayer)
   const [item, setItem] = useState(editingExpense?.item || '')
   const [amount, setAmount] = useState(editingExpense?.amount?.toString() || '')
-  const [currency, setCurrency] = useState(editingExpense?.currency || settings.defaultCurrency)
+  const [currency, setCurrency] = useState(editingExpense?.currency || localStorage.getItem('kw-last-currency') || settings.defaultCurrency)
   const [datetime, setDatetime] = useState(
     editingExpense
       ? editingExpense.createdAt.slice(0, 16)
@@ -25,7 +25,8 @@ export function ExpenseForm({ defaultPayer, editingExpense, onClose }: ExpenseFo
   )
   const [saveAsTemplate, setSaveAsTemplate] = useState(false)
 
-  const currencyOptions = ['TWD', ...Object.keys(settings.exchangeRates).filter((c) => c !== 'TWD').sort()]
+  const trackedList: string[] = JSON.parse(localStorage.getItem('kw-tracked-currencies') || '[]')
+  const currencyOptions = ['TWD', ...trackedList.filter((c) => c !== 'TWD')]
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -69,6 +70,7 @@ export function ExpenseForm({ defaultPayer, editingExpense, onClose }: ExpenseFo
         })
       }
     }
+    localStorage.setItem('kw-last-currency', currency)
     onClose()
   }
 
