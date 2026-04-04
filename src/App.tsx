@@ -7,6 +7,7 @@ import { Templates } from './pages/Templates'
 import { SettingsPage } from './pages/Settings'
 import { OperationLogs } from './pages/OperationLogs'
 import { NavBar } from './components/NavBar'
+import { UpdatePrompt } from './components/UpdatePrompt'
 import './App.css'
 
 function hexToRgb(hex: string) {
@@ -57,6 +58,7 @@ function App() {
   return (
     <AppProvider>
       <AppContent />
+      <UpdatePrompt />
     </AppProvider>
   )
 }
