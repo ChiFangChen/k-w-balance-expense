@@ -3,6 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faPlus } from '@fortawesome/free-solid-svg-icons'
 import { useApp } from '../context/AppContext'
 import { ExpenseForm } from '../components/ExpenseForm'
+import { formatDate } from '../utils/date'
 import type { Person, Expense } from '../types'
 
 export function Expenses() {
@@ -37,10 +38,7 @@ export function Expenses() {
     setShowForm(true)
   }
 
-  const formatDate = (iso: string) => {
-    const d = new Date(iso)
-    return `${d.getMonth() + 1}/${d.getDate()} ${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`
-  }
+  const fmt = (iso: string) => formatDate(iso, settings.timezone)
 
   return (
     <div className="page expenses-page">
@@ -100,7 +98,7 @@ export function Expenses() {
               </span>
               <div className="expense-info">
                 <div className="expense-item-name">{expense.item}</div>
-                <div className="expense-date">{formatDate(expense.createdAt)}</div>
+                <div className="expense-date">{fmt(expense.createdAt)}</div>
               </div>
             </div>
             <div className="expense-right">

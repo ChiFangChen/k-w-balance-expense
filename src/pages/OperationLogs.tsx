@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faScaleBalanced, faTrashCan, faChevronDown } from '@fortawesome/free-solid-svg-icons'
 import { useApp } from '../context/AppContext'
+import { formatDate } from '../utils/date'
 
 export function OperationLogs() {
   const { state } = useApp()
@@ -12,10 +13,7 @@ export function OperationLogs() {
     setExpandedId((prev) => (prev === id ? null : id))
   }
 
-  const formatDate = (iso: string) => {
-    const d = new Date(iso)
-    return `${d.getFullYear()}/${(d.getMonth() + 1).toString().padStart(2, '0')}/${d.getDate().toString().padStart(2, '0')} ${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`
-  }
+  const fmt = (iso: string) => formatDate(iso, settings.timezone)
 
   return (
     <div className="page logs-page">
@@ -36,7 +34,7 @@ export function OperationLogs() {
                   {log.type === 'balance' ? <><FontAwesomeIcon icon={faScaleBalanced} /> 平衡</> : <><FontAwesomeIcon icon={faTrashCan} /> 重置</>}
                 </span>
                 <div className="log-header-right">
-                  <span className="log-date">{formatDate(log.timestamp)}</span>
+                  <span className="log-date">{fmt(log.timestamp)}</span>
                   <FontAwesomeIcon
                     icon={faChevronDown}
                     className={`log-chevron ${isExpanded ? 'log-chevron-open' : ''}`}

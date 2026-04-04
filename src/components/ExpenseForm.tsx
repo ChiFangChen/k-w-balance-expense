@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useApp } from '../context/AppContext'
 import type { Person, Expense } from '../types'
 import { convertToDefault } from '../utils/currency'
+import { isoToLocalDatetime, localDatetimeToISO } from '../utils/date'
 
 
 interface ExpenseFormProps {
@@ -18,11 +19,11 @@ export function ExpenseForm({ defaultPayer, editingExpense, onClose }: ExpenseFo
   const [item, setItem] = useState(editingExpense?.item || '')
   const [amount, setAmount] = useState(editingExpense?.amount?.toString() || '')
   const [currency, setCurrency] = useState(editingExpense?.currency || localStorage.getItem('kw-last-currency') || settings.defaultCurrency)
-  const [datetime, setDatetime] = useState(
-    editingExpense
-      ? editingExpense.createdAt.slice(0, 16)
-      : new Date().toISOString().slice(0, 16)
-  )
+  const tz = settings.timezone || 'Asia/Taipei'
+  const [datetime, setDatetime] = useState(() => {
+    if (editingExpense) return isoToLocalDatetime(editingExpense.createdAt, tz)
+    return isoToLocalDatetime(new Date().toISOString(), tz)
+  })
   const [saveAsTemplate, setSaveAsTemplate] = useState(false)
 
   const trackedList: string[] = JSON.parse(localStorage.getItem('kw-tracked-currencies') || '[]')
@@ -49,7 +50,7 @@ export function ExpenseForm({ defaultPayer, editingExpense, onClose }: ExpenseFo
         currency,
         exchangeRate,
         convertedAmount,
-        createdAt: new Date(datetime).toISOString(),
+        createdAt: localDatetimeToISO(datetime, tz),
       })
     } else {
       addExpense({
@@ -59,6 +60,7 @@ export function ExpenseForm({ defaultPayer, editingExpense, onClose }: ExpenseFo
         currency,
         exchangeRate,
         convertedAmount,
+        createdAt: localDatetimeToISO(datetime, tz),
       })
 
       if (saveAsTemplate) {
