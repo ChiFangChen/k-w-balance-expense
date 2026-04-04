@@ -32,7 +32,7 @@ export function ExpenseForm({ defaultPayer, editingExpense, onClose }: ExpenseFo
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     const numAmount = parseFloat(amount)
-    if (!payer || !item.trim() || isNaN(numAmount) || numAmount <= 0) return
+    if (!payer || isNaN(numAmount) || numAmount <= 0) return
 
     const { convertedAmount, exchangeRate } = convertToDefault(
       numAmount,
@@ -112,7 +112,6 @@ export function ExpenseForm({ defaultPayer, editingExpense, onClose }: ExpenseFo
                 type="text"
                 value={item}
                 onChange={(e) => setItem(e.target.value)}
-                required
               />
             </div>
 
