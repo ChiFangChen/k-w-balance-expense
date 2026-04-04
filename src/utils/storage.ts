@@ -8,6 +8,7 @@ export const defaultSettings: Settings = {
   ratioKiki: 33,
   defaultCurrency: 'TWD',
   exchangeRates: {},
+  timezone: 'Asia/Taipei',
   theme: 'light',
   colorKiki: '#FF6B9D',
   colorWayne: '#4ECDC4',

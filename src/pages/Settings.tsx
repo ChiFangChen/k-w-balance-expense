@@ -1,8 +1,9 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faMoon, faSun, faRotate, faPlus, faTrash, faSync, faCheck, faTimes } from '@fortawesome/free-solid-svg-icons'
 import { useApp } from '../context/AppContext'
 import { fetchExchangeRates } from '../utils/currency'
+import { formatDate, formatTimezoneLabel, getTimezones } from '../utils/date'
 import { clearIdentity } from '../utils/storage'
 
 const CURRENCY_WHITELIST = ['TWD', 'JPY', 'THB', 'USD', 'CNY']
@@ -19,6 +20,14 @@ export function SettingsPage() {
   const [editingRate, setEditingRate] = useState<string | null>(null)
   const [editingRateValue, setEditingRateValue] = useState('')
   const [currencySearch, setCurrencySearch] = useState('')
+  const timezoneList = getTimezones()
+  const [tzSearch, setTzSearch] = useState('')
+  const [tzOpen, setTzOpen] = useState(false)
+  const filteredTimezones = useMemo(() => {
+    if (!tzSearch) return timezoneList
+    const q = tzSearch.toLowerCase()
+    return timezoneList.filter((tz) => tz.toLowerCase().includes(q) || formatTimezoneLabel(tz).toLowerCase().includes(q))
+  }, [tzSearch, timezoneList])
 
   const TRACKED_KEY = 'kw-tracked-currencies'
   const [trackedList, setTrackedList] = useState<string[]>(() => {
@@ -174,7 +183,7 @@ export function SettingsPage() {
           </button>
           {settings.exchangeRatesUpdatedAt && (
             <span className="settings-hint" style={{ margin: 0, marginLeft: 'auto', opacity: 0.7 }}>
-              同步於 {new Date(settings.exchangeRatesUpdatedAt).toLocaleString('zh-TW', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+              同步於 {formatDate(settings.exchangeRatesUpdatedAt, settings.timezone)}
             </span>
           )}
         </div>
@@ -297,6 +306,43 @@ export function SettingsPage() {
           </div>
         )
       })()}
+
+      {/* Timezone */}
+      <section className="settings-section">
+        <h2>時區</h2>
+        <div className="form-group" style={{ position: 'relative' }}>
+          <input
+            type="text"
+            value={tzOpen ? tzSearch : formatTimezoneLabel(settings.timezone || 'Asia/Taipei')}
+            placeholder="搜尋時區..."
+            onFocus={() => { setTzOpen(true); setTzSearch('') }}
+            onBlur={() => setTimeout(() => setTzOpen(false), 200)}
+            onChange={(e) => setTzSearch(e.target.value)}
+          />
+          {tzOpen && (
+            <div className="tz-dropdown">
+              {filteredTimezones.slice(0, 20).map((tz) => (
+                <div
+                  key={tz}
+                  className={`tz-dropdown-item${tz === (settings.timezone || 'Asia/Taipei') ? ' active' : ''}`}
+                  onMouseDown={() => {
+                    updateSettings({ timezone: tz })
+                    setTzOpen(false)
+                  }}
+                >
+                  {formatTimezoneLabel(tz)}
+                </div>
+              ))}
+              {filteredTimezones.length === 0 && (
+                <div className="tz-dropdown-item" style={{ opacity: 0.5 }}>找不到符合的時區</div>
+              )}
+              {filteredTimezones.length > 20 && (
+                <div className="tz-dropdown-item" style={{ opacity: 0.5 }}>輸入更多字以縮小範圍...</div>
+              )}
+            </div>
+          )}
+        </div>
+      </section>
 
       {/* Theme */}
       <section className="settings-section">

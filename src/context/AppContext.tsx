@@ -101,7 +101,7 @@ function reducer(state: AppState, action: Action): AppState {
 
 interface AppContextValue {
   state: AppState
-  addExpense: (expense: Omit<Expense, 'id' | 'createdAt' | 'updatedAt'>) => void
+  addExpense: (expense: Omit<Expense, 'id' | 'createdAt' | 'updatedAt'> & { createdAt?: string }) => void
   updateExpense: (expense: Expense) => void
   deleteExpense: (id: string) => void
   addTemplate: (template: Omit<Template, 'id'>) => void
@@ -169,9 +169,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     saveState(state)
   }, [state])
 
-  const addExpense = useCallback((data: Omit<Expense, 'id' | 'createdAt' | 'updatedAt'>) => {
+  const addExpense = useCallback((data: Omit<Expense, 'id' | 'createdAt' | 'updatedAt'> & { createdAt?: string }) => {
     const now = new Date().toISOString()
-    const expense: Expense = { ...data, id: generateId(), createdAt: now, updatedAt: now }
+    const expense: Expense = { ...data, id: generateId(), createdAt: data.createdAt || now, updatedAt: now }
     dispatch({ type: 'ADD_EXPENSE', expense })
     if (dbRef.current) syncExpense(dbRef.current, expense)
   }, [])
