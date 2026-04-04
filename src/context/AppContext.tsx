@@ -20,6 +20,7 @@ import {
   batchReplaceExpenses,
   batchDeleteAllExpenses,
 } from '../utils/firebase'
+import type { Firestore } from 'firebase/firestore'
 
 type Action =
   | { type: 'SET_EXPENSES'; expenses: Expense[] }
@@ -117,31 +118,31 @@ const AppContext = createContext<AppContextValue | null>(null)
 
 export function AppProvider({ children }: { children: React.ReactNode }) {
   const [state, dispatch] = useReducer(reducer, undefined, loadState)
-  const dbRef = useRef<ReturnType<typeof initFirebase>>(null)
+  const dbRef = useRef<Firestore | null>(null)
   const firebaseListeningRef = useRef(false)
 
   // Initialize Firebase
   useEffect(() => {
     if (isFirebaseConfigured() && !firebaseListeningRef.current) {
-      const db = initFirebase()
-      dbRef.current = db
-      if (db) {
-        firebaseListeningRef.current = true
-        const unsub1 = subscribeToExpenses(db, (expenses) => dispatch({ type: 'SET_EXPENSES', expenses }))
-        const unsub2 = subscribeToTemplates(db, (templates) => dispatch({ type: 'SET_TEMPLATES', templates }))
-        const unsub3 = subscribeToOperationLogs(db, (logs) => dispatch({ type: 'SET_OPERATION_LOGS', logs }))
-        const unsub4 = subscribeToSettings(db, (remoteSettings) => {
-          // Preserve local-only settings when syncing from Firebase
-          const { theme: _, colorKiki: _ck, colorWayne: _cw, ...rest } = remoteSettings
-          dispatch({ type: 'UPDATE_SETTINGS', settings: rest })
-        })
-        return () => {
-          unsub1()
-          unsub2()
-          unsub3()
-          unsub4()
-          firebaseListeningRef.current = false
+      let cleanups: (() => void)[] = []
+      initFirebase().then((db) => {
+        dbRef.current = db
+        if (db) {
+          firebaseListeningRef.current = true
+          const unsub1 = subscribeToExpenses(db, (expenses) => dispatch({ type: 'SET_EXPENSES', expenses }))
+          const unsub2 = subscribeToTemplates(db, (templates) => dispatch({ type: 'SET_TEMPLATES', templates }))
+          const unsub3 = subscribeToOperationLogs(db, (logs) => dispatch({ type: 'SET_OPERATION_LOGS', logs }))
+          const unsub4 = subscribeToSettings(db, (remoteSettings) => {
+            // Preserve local-only settings when syncing from Firebase
+            const { theme: _, colorKiki: _ck, colorWayne: _cw, ...rest } = remoteSettings
+            dispatch({ type: 'UPDATE_SETTINGS', settings: rest })
+          })
+          cleanups = [unsub1, unsub2, unsub3, unsub4]
         }
+      })
+      return () => {
+        cleanups.forEach((fn) => fn())
+        firebaseListeningRef.current = false
       }
     }
   }, [])
