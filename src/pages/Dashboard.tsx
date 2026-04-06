@@ -108,6 +108,7 @@ export function Dashboard() {
       </div>
 
       {/* Ratio Cards */}
+      <div className="section-label">目前比例</div>
       <div className="totals-row">
         <div className="total-card kiki-card">
           <div className="total-label">Kiki</div>
@@ -131,12 +132,7 @@ export function Dashboard() {
       {/* Grand Total - de-emphasized */}
       {total > 0 && (
         <div className="grand-total-muted">
-          <div className="grand-total-breakdown">
-            <span style={{ color: settings.colorKiki }}>K ${Math.ceil(totals.kiki).toLocaleString()}</span>
-            {' / '}
-            <span style={{ color: settings.colorWayne }}>W ${Math.ceil(totals.wayne).toLocaleString()}</span>
-          </div>
-          <div>總計: ${Math.ceil(total).toLocaleString()} {settings.defaultCurrency}</div>
+          總計: ${Math.ceil(total).toLocaleString()} {settings.defaultCurrency}
         </div>
       )}
 

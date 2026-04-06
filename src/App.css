@@ -300,6 +300,16 @@ body {
   font-size: 0.8rem;
 }
 
+/* Section Label */
+.section-label {
+  font-size: 0.7rem;
+  color: var(--color-muted-foreground);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+  margin-bottom: 0.375rem;
+}
+
 /* Target Ratio Bar */
 .target-ratio-bar {
   margin-bottom: 1rem;
