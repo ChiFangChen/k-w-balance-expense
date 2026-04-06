@@ -101,9 +101,23 @@ export function Dashboard() {
         </div>
       </div>
 
-      {/* Target Ratio */}
-      <div className="target-ratio">
-        目標比例: Kiki {settings.ratioKiki}% / Wayne {settings.ratioWayne}%
+      {/* Target Ratio Bar */}
+      <div className="target-ratio-bar">
+        <div className="target-ratio-label">目標比例</div>
+        <div className="target-ratio-track">
+          <div
+            className="target-ratio-fill kiki-fill"
+            style={{ width: `${settings.ratioKiki}%`, backgroundColor: settings.colorKiki }}
+          >
+            {settings.ratioKiki}%
+          </div>
+          <div
+            className="target-ratio-fill wayne-fill"
+            style={{ width: `${settings.ratioWayne}%`, backgroundColor: settings.colorWayne }}
+          >
+            {settings.ratioWayne}%
+          </div>
+        </div>
       </div>
 
       {/* Pie Chart */}
