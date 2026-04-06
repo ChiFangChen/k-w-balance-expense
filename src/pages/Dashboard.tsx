@@ -42,6 +42,7 @@ export function Dashboard() {
     plugins: {
       legend: {
         position: 'bottom' as const,
+        reverse: true,
       },
     },
   }
