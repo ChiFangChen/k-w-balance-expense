@@ -121,32 +121,10 @@ export function Dashboard() {
         </div>
       </div>
 
-      {/* Target Ratio Bar */}
-      <div className="target-ratio-bar">
-        <div className="target-ratio-label">目標比例</div>
-        <div className="target-ratio-track">
-          <div
-            className="target-ratio-fill kiki-fill"
-            style={{ width: `${settings.ratioKiki}%`, backgroundColor: settings.colorKiki }}
-          >
-            {settings.ratioKiki}%
-          </div>
-          <div
-            className="target-ratio-fill wayne-fill"
-            style={{ width: `${settings.ratioWayne}%`, backgroundColor: settings.colorWayne }}
-          >
-            {settings.ratioWayne}%
-          </div>
-        </div>
-      </div>
-
       {/* Pie Chart */}
       {total > 0 && (
-        <div className="chart-section">
-          <div className="chart-section-label">實際比例</div>
-          <div className="chart-container">
-            <Pie data={pieData} options={pieOptions} plugins={[piePluginLabels]} />
-          </div>
+        <div className="chart-container">
+          <Pie data={pieData} options={pieOptions} plugins={[piePluginLabels]} />
         </div>
       )}
 
@@ -179,6 +157,25 @@ export function Dashboard() {
           </button>
         </div>
       )}
+
+      {/* Target Ratio Bar */}
+      <div className="target-ratio-bar">
+        <div className="target-ratio-label">目標比例</div>
+        <div className="target-ratio-track">
+          <div
+            className="target-ratio-fill kiki-fill"
+            style={{ width: `${settings.ratioKiki}%`, backgroundColor: settings.colorKiki }}
+          >
+            {settings.ratioKiki}%
+          </div>
+          <div
+            className="target-ratio-fill wayne-fill"
+            style={{ width: `${settings.ratioWayne}%`, backgroundColor: settings.colorWayne }}
+          >
+            {settings.ratioWayne}%
+          </div>
+        </div>
+      </div>
 
       {/* Confirm Dialogs */}
       <ConfirmDialog
