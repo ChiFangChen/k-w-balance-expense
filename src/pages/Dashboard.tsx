@@ -26,12 +26,12 @@ export function Dashboard() {
   const total = totals.kiki + totals.wayne
 
   const pieData = {
-    labels: ['Kiki', 'Wayne'],
+    labels: ['Wayne', 'Kiki'],
     datasets: [
       {
-        data: [totals.kiki || 0, totals.wayne || 0],
-        backgroundColor: [settings.colorKiki, settings.colorWayne],
-        borderColor: [settings.colorKiki, settings.colorWayne],
+        data: [totals.wayne || 0, totals.kiki || 0],
+        backgroundColor: [settings.colorWayne, settings.colorKiki],
+        borderColor: [settings.colorWayne, settings.colorKiki],
         borderWidth: 2,
       },
     ],
