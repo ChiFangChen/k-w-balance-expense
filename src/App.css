@@ -371,7 +371,10 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  max-width: 100%;
+}
+.chart-container canvas {
+  max-width: 280px !important;
+  max-height: 280px !important;
 }
 
 /* Action Buttons */
