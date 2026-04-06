@@ -37,6 +37,25 @@ export function Dashboard() {
     ],
   }
 
+  const piePluginLabels = {
+    id: 'pieLabels',
+    afterDraw(chart: ChartJS) {
+      const { ctx } = chart
+      const meta = chart.getDatasetMeta(0)
+      meta.data.forEach((element, i) => {
+        const { x, y } = element
+        const pct = i === 0 ? ratio.wayne : ratio.kiki
+        ctx.save()
+        ctx.fillStyle = 'white'
+        ctx.font = 'bold 14px sans-serif'
+        ctx.textAlign = 'center'
+        ctx.textBaseline = 'middle'
+        ctx.fillText(`${pct}%`, x, y)
+        ctx.restore()
+      })
+    },
+  }
+
   const pieOptions = {
     responsive: true,
     plugins: {
@@ -123,8 +142,11 @@ export function Dashboard() {
 
       {/* Pie Chart */}
       {total > 0 && (
-        <div className="chart-container">
-          <Pie data={pieData} options={pieOptions} />
+        <div className="chart-section">
+          <div className="chart-section-label">實際比例</div>
+          <div className="chart-container">
+            <Pie data={pieData} options={pieOptions} plugins={[piePluginLabels]} />
+          </div>
         </div>
       )}
 
