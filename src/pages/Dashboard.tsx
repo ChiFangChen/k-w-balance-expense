@@ -140,24 +140,6 @@ export function Dashboard() {
         </div>
       )}
 
-      {/* Action Buttons - only show when there's data */}
-      {total > 0 && (
-        <div className="action-buttons">
-          <button
-            className="btn btn-warning"
-            onClick={() => setShowBalanceConfirm(true)}
-          >
-            <FontAwesomeIcon icon={faScaleBalanced} /> 平衡
-          </button>
-          <button
-            className="btn btn-danger"
-            onClick={() => setShowResetConfirm(true)}
-          >
-            <FontAwesomeIcon icon={faTrashCan} /> 重置
-          </button>
-        </div>
-      )}
-
       {/* Target Ratio Bar */}
       <div className="target-ratio-bar">
         <div className="target-ratio-label">目標比例</div>
@@ -176,6 +158,24 @@ export function Dashboard() {
           </div>
         </div>
       </div>
+
+      {/* Action Buttons - only show when there's data */}
+      {total > 0 && (
+        <div className="action-buttons">
+          <button
+            className="btn btn-warning"
+            onClick={() => setShowBalanceConfirm(true)}
+          >
+            <FontAwesomeIcon icon={faScaleBalanced} /> 平衡
+          </button>
+          <button
+            className="btn btn-danger"
+            onClick={() => setShowResetConfirm(true)}
+          >
+            <FontAwesomeIcon icon={faTrashCan} /> 重置
+          </button>
+        </div>
+      )}
 
       {/* Confirm Dialogs */}
       <ConfirmDialog
