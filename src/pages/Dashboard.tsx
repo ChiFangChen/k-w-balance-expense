@@ -25,7 +25,7 @@ export function Dashboard() {
   const gap = calculateGap(totals, settings)
   const total = totals.kiki + totals.wayne
 
-  const pieData = {
+  const donutData = {
     labels: ['Wayne', 'Kiki'],
     datasets: [
       {
@@ -37,27 +37,46 @@ export function Dashboard() {
     ],
   }
 
-  const piePluginLabels = {
-    id: 'pieLabels',
+  const totalText = `$${Math.ceil(total).toLocaleString()}`
+
+  const donutPlugins = {
+    id: 'donutLabels',
     afterDraw(chart: ChartJS) {
-      const { ctx } = chart
+      const { ctx, chartArea } = chart
+      const centerX = (chartArea.left + chartArea.right) / 2
+      const centerY = (chartArea.top + chartArea.bottom) / 2
+
+      // Draw percentage on each slice
       const meta = chart.getDatasetMeta(0)
       meta.data.forEach((element, i) => {
         const { x, y } = element
         const pct = i === 0 ? ratio.wayne : ratio.kiki
         ctx.save()
         ctx.fillStyle = 'white'
-        ctx.font = 'bold 14px sans-serif'
+        ctx.font = 'bold 13px sans-serif'
         ctx.textAlign = 'center'
         ctx.textBaseline = 'middle'
         ctx.fillText(`${pct}%`, x, y)
         ctx.restore()
       })
+
+      // Draw total in center
+      ctx.save()
+      ctx.fillStyle = getComputedStyle(chart.canvas).getPropertyValue('color') || '#0f172a'
+      ctx.font = 'bold 18px sans-serif'
+      ctx.textAlign = 'center'
+      ctx.textBaseline = 'middle'
+      ctx.fillText(totalText, centerX, centerY - 8)
+      ctx.font = '12px sans-serif'
+      ctx.globalAlpha = 0.5
+      ctx.fillText(settings.defaultCurrency, centerX, centerY + 12)
+      ctx.restore()
     },
   }
 
-  const pieOptions = {
+  const donutOptions = {
     responsive: true,
+    cutout: '45%',
     plugins: {
       legend: {
         position: 'bottom' as const,
@@ -122,17 +141,10 @@ export function Dashboard() {
         </div>
       </div>
 
-      {/* Pie Chart */}
+      {/* Donut Chart with total in center */}
       {total > 0 && (
         <div className="chart-container">
-          <Pie data={pieData} options={pieOptions} plugins={[piePluginLabels]} />
-        </div>
-      )}
-
-      {/* Grand Total - de-emphasized */}
-      {total > 0 && (
-        <div className="grand-total-muted">
-          總計: ${Math.ceil(total).toLocaleString()} {settings.defaultCurrency}
+          <Pie data={donutData} options={donutOptions} plugins={[donutPlugins]} />
         </div>
       )}
 
