@@ -272,33 +272,28 @@ body {
   letter-spacing: 0.05em;
   margin-bottom: 0.25rem;
 }
-.total-amount {
-  font-size: 1.25rem;
+.total-ratio-main {
+  font-size: 1.5rem;
   font-weight: 700;
 }
-.total-card.kiki-card .total-amount {
+.total-card.kiki-card .total-ratio-main {
   color: var(--color-kiki);
 }
-.total-card.wayne-card .total-amount {
+.total-card.wayne-card .total-ratio-main {
   color: var(--color-wayne);
 }
-.total-ratio {
+.total-amount-sub {
   font-size: 0.75rem;
   color: var(--color-muted-foreground);
   margin-top: 0.25rem;
 }
 
-/* Grand Total */
-.grand-total {
-  background-color: var(--color-card);
-  border-radius: var(--radius-lg);
-
-  padding: 1rem;
+/* Grand Total (muted) */
+.grand-total-muted {
   text-align: center;
   margin-bottom: 1rem;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-  font-size: 1.125rem;
-  font-weight: 600;
+  font-size: 0.8rem;
+  color: var(--color-muted-foreground);
 }
 
 /* Target Ratio */
@@ -313,16 +308,39 @@ body {
   font-weight: 500;
 }
 
-/* Gap Info */
-.gap-info {
+/* Gap Hero */
+.gap-hero {
   background-color: var(--color-card);
   border-radius: var(--radius-lg);
-
-  padding: 1rem;
-  margin-bottom: 1rem;
+  padding: 1.25rem 1rem;
+  margin-bottom: 1.25rem;
   text-align: center;
-  font-size: 0.875rem;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+.gap-hero-label {
+  font-size: 0.75rem;
+  color: var(--color-muted-foreground);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+.gap-hero-person {
+  font-size: 1.75rem;
+  font-weight: 800;
+  line-height: 1.2;
+}
+.gap-hero-amount {
+  font-size: 1rem;
+  color: var(--color-muted-foreground);
+  margin-top: 0.25rem;
+}
+.gap-hero-amount strong {
+  color: var(--color-foreground);
+}
+.gap-hero-balanced .gap-hero-label {
+  font-size: 1rem;
+  color: var(--color-success);
 }
 
 /* Chart */

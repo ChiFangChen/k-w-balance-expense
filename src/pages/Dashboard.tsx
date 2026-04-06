@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Pie } from 'react-chartjs-2'
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faScaleBalanced, faTrashCan, faLightbulb, faPlus } from '@fortawesome/free-solid-svg-icons'
+import { faScaleBalanced, faTrashCan, faPlus } from '@fortawesome/free-solid-svg-icons'
 import { useApp } from '../context/AppContext'
 import { calculateTotals, calculateCurrentRatio, calculateGap } from '../utils/balance'
 import { ConfirmDialog } from '../components/ConfirmDialog'
@@ -58,10 +58,21 @@ export function Dashboard() {
         <span className="identity-badge">{state.identity}</span>
       </header>
 
-      {/* Target Ratio */}
-      <div className="target-ratio">
-        目標比例: Kiki {settings.ratioKiki}% / Wayne {settings.ratioWayne}%
-      </div>
+      {/* Gap - most prominent */}
+      {gap.person ? (
+        <div className="gap-hero">
+          <div className="gap-hero-person" style={{ color: gap.person === 'Kiki' ? 'var(--color-kiki)' : 'var(--color-wayne)' }}>
+            {gap.person}
+          </div>
+          <div className="gap-hero-amount">
+            還需花 <strong>${Math.ceil(gap.amount).toLocaleString()}</strong> {settings.defaultCurrency} 才能平衡
+          </div>
+        </div>
+      ) : total > 0 ? (
+        <div className="gap-hero gap-hero-balanced">
+          <div className="gap-hero-label">目前已平衡</div>
+        </div>
+      ) : null}
 
       {/* Quick Add Buttons */}
       <div className="quick-add">
@@ -76,37 +87,36 @@ export function Dashboard() {
         </button>
       </div>
 
-      {/* Totals */}
+      {/* Ratio Cards */}
       <div className="totals-row">
         <div className="total-card kiki-card">
           <div className="total-label">Kiki</div>
-          <div className="total-amount">${Math.ceil(totals.kiki).toLocaleString()}</div>
-          <div className="total-ratio">{ratio.kiki}%</div>
+          <div className="total-ratio-main">{ratio.kiki}%</div>
+          <div className="total-amount-sub">${Math.ceil(totals.kiki).toLocaleString()}</div>
         </div>
         <div className="total-card wayne-card">
           <div className="total-label">Wayne</div>
-          <div className="total-amount">${Math.ceil(totals.wayne).toLocaleString()}</div>
-          <div className="total-ratio">{ratio.wayne}%</div>
+          <div className="total-ratio-main">{ratio.wayne}%</div>
+          <div className="total-amount-sub">${Math.ceil(totals.wayne).toLocaleString()}</div>
         </div>
       </div>
 
-      {/* Total */}
-      <div className="grand-total">
-        總計: ${Math.ceil(total).toLocaleString()} {settings.defaultCurrency}
+      {/* Target Ratio */}
+      <div className="target-ratio">
+        目標比例: Kiki {settings.ratioKiki}% / Wayne {settings.ratioWayne}%
       </div>
-
-      {/* Gap */}
-      {gap.person && (
-        <div className="gap-info">
-          <FontAwesomeIcon icon={faLightbulb} style={{ marginRight: '0.5rem', color: 'var(--color-warning)' }} />
-          {gap.person} 還需要花 <strong>${Math.ceil(gap.amount).toLocaleString()}</strong> {settings.defaultCurrency} 才能平衡
-        </div>
-      )}
 
       {/* Pie Chart */}
       {total > 0 && (
         <div className="chart-container">
           <Pie data={pieData} options={pieOptions} />
+        </div>
+      )}
+
+      {/* Grand Total - de-emphasized */}
+      {total > 0 && (
+        <div className="grand-total-muted">
+          總計: ${Math.ceil(total).toLocaleString()} {settings.defaultCurrency}
         </div>
       )}
 
