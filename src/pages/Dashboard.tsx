@@ -153,7 +153,12 @@ export function Dashboard() {
       {/* Grand Total - de-emphasized */}
       {total > 0 && (
         <div className="grand-total-muted">
-          總計: ${Math.ceil(total).toLocaleString()} {settings.defaultCurrency}
+          <div className="grand-total-breakdown">
+            <span style={{ color: settings.colorKiki }}>K ${Math.ceil(totals.kiki).toLocaleString()}</span>
+            {' / '}
+            <span style={{ color: settings.colorWayne }}>W ${Math.ceil(totals.wayne).toLocaleString()}</span>
+          </div>
+          <div>總計: ${Math.ceil(total).toLocaleString()} {settings.defaultCurrency}</div>
         </div>
       )}
 

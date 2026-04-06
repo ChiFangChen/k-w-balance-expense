@@ -295,6 +295,10 @@ body {
   font-size: 0.8rem;
   color: var(--color-muted-foreground);
 }
+.grand-total-breakdown {
+  margin-bottom: 0.125rem;
+  font-size: 0.8rem;
+}
 
 /* Target Ratio Bar */
 .target-ratio-bar {
