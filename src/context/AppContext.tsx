@@ -134,8 +134,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           const unsub3 = subscribeToOperationLogs(db, (logs) => dispatch({ type: 'SET_OPERATION_LOGS', logs }))
           const unsub4 = subscribeToSettings(db, (remoteSettings) => {
             // Preserve local-only settings when syncing from Firebase
-            const { theme: _, colorKiki: _ck, colorWayne: _cw, ...rest } = remoteSettings
-            dispatch({ type: 'UPDATE_SETTINGS', settings: rest })
+            const { theme: _, colorKiki: _ck, colorWayne: _cw, exchangeRatesUpdatedAt, ...rest } = remoteSettings
+            dispatch({ type: 'UPDATE_SETTINGS', settings: {
+              ...rest,
+              ...(exchangeRatesUpdatedAt ? { exchangeRatesUpdatedAt } : {}),
+            } })
           })
           cleanups = [unsub1, unsub2, unsub3, unsub4]
         }
@@ -157,7 +160,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           for (const code of CURRENCY_WHITELIST) {
             if (rates[code]) filtered[code] = rates[code]
           }
-          dispatch({ type: 'UPDATE_SETTINGS', settings: { exchangeRates: filtered } })
+          dispatch({ type: 'UPDATE_SETTINGS', settings: { exchangeRates: filtered, exchangeRatesUpdatedAt: new Date().toISOString() } })
         })
         .catch(() => {
           // Silently fail — user can manually set rates
