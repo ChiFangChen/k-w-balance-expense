@@ -3,7 +3,7 @@ import { useApp } from '../context/AppContext'
 import type { Person, Expense } from '../types'
 import { convertToDefault } from '../utils/currency'
 import { isoToLocalDatetime, localDatetimeToISO } from '../utils/date'
-
+import { generateId } from '../utils/id'
 
 interface ExpenseFormProps {
   defaultPayer?: Person
@@ -41,6 +41,8 @@ export function ExpenseForm({ defaultPayer, editingExpense, onClose }: ExpenseFo
       settings.exchangeRates
     )
 
+    const now = new Date().toISOString()
+
     if (editingExpense && editingExpense.id) {
       updateExpense({
         ...editingExpense,
@@ -51,9 +53,11 @@ export function ExpenseForm({ defaultPayer, editingExpense, onClose }: ExpenseFo
         exchangeRate,
         convertedAmount,
         createdAt: localDatetimeToISO(datetime, tz),
+        updatedAt: now,
       })
     } else {
       addExpense({
+        id: generateId(),
         payer,
         item: item.trim(),
         amount: numAmount,
@@ -61,10 +65,12 @@ export function ExpenseForm({ defaultPayer, editingExpense, onClose }: ExpenseFo
         exchangeRate,
         convertedAmount,
         createdAt: localDatetimeToISO(datetime, tz),
+        updatedAt: now,
       })
 
       if (saveAsTemplate) {
         addTemplate({
+          id: generateId(),
           payer,
           item: item.trim(),
           amount: numAmount,

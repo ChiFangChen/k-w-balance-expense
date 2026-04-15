@@ -5,7 +5,7 @@ import { useApp } from '../context/AppContext'
 import type { Template, Person } from '../types'
 import { ExpenseForm } from '../components/ExpenseForm'
 import { convertToDefault } from '../utils/currency'
-
+import { generateId } from '../utils/id'
 
 export function Templates() {
   const { state, addTemplate, updateTemplate, deleteTemplate, addExpense } = useApp()
@@ -54,6 +54,7 @@ export function Templates() {
       })
     } else {
       addTemplate({
+        id: generateId(),
         payer: formPayer,
         item: formItem.trim(),
         amount: numAmount,
@@ -70,13 +71,17 @@ export function Templates() {
       settings.defaultCurrency,
       settings.exchangeRates
     )
+    const now = new Date().toISOString()
     addExpense({
+      id: generateId(),
       payer: template.payer,
       item: template.item,
       amount: template.amount,
       currency: template.currency,
       exchangeRate,
       convertedAmount,
+      createdAt: now,
+      updatedAt: now,
     })
   }
 

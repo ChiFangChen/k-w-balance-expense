@@ -12,7 +12,7 @@ import type { Person } from '../types'
 ChartJS.register(ArcElement, Tooltip, Legend)
 
 export function Dashboard() {
-  const { state, performBalanceAction, performResetAction } = useApp()
+  const { state, performBalance, performReset } = useApp()
   const { expenses, settings } = state
 
   const [showBalanceConfirm, setShowBalanceConfirm] = useState(false)
@@ -192,7 +192,7 @@ export function Dashboard() {
         message={`將等比例縮小帳目金額，Kiki: $${Math.ceil(totals.kiki).toLocaleString()}, Wayne: $${Math.ceil(totals.wayne).toLocaleString()}`}
         confirmText="執行平衡"
         onConfirm={() => {
-          performBalanceAction()
+          performBalance()
           setShowBalanceConfirm(false)
         }}
         onCancel={() => setShowBalanceConfirm(false)}
@@ -204,7 +204,7 @@ export function Dashboard() {
         message="將刪除所有帳目資料，此操作無法復原！"
         confirmText="執行重置"
         onConfirm={() => {
-          performResetAction()
+          performReset()
           setShowResetConfirm(false)
         }}
         onCancel={() => setShowResetConfirm(false)}
