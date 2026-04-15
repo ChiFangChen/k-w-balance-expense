@@ -1,9 +1,9 @@
+/* eslint-disable react-refresh/only-export-components */
 import React, { createContext, useContext, useEffect, useReducer, useCallback, useRef } from 'react'
 import type { AppState, Expense, Template, Settings, Person, OperationLog } from '../types'
 import { loadState, saveState } from '../utils/storage'
 import { generateId } from '../utils/id'
-import { performBalance, calculateTotals } from '../utils/balance'
-import { fetchExchangeRates } from '../utils/currency'
+import { performBalance } from '../utils/balance'
 import {
   initFirebase,
   isFirebaseConfigured,
@@ -15,10 +15,8 @@ import {
   deleteExpenseFromFirestore,
   syncTemplate,
   deleteTemplateFromFirestore,
-  syncOperationLog,
   syncSettings,
   batchReplaceExpenses,
-  batchDeleteAllExpenses,
 } from '../utils/firebase'
 import type { Firestore } from 'firebase/firestore'
 
@@ -31,13 +29,12 @@ type Action =
   | { type: 'ADD_TEMPLATE'; template: Template }
   | { type: 'UPDATE_TEMPLATE'; template: Template }
   | { type: 'DELETE_TEMPLATE'; id: string }
+  | { type: 'SET_OPERATION_LOGS'; logs: OperationLog[] }
   | { type: 'SET_SETTINGS'; settings: Settings }
   | { type: 'UPDATE_SETTINGS'; settings: Partial<Settings> }
-  | { type: 'SET_OPERATION_LOGS'; logs: OperationLog[] }
-  | { type: 'ADD_OPERATION_LOG'; log: OperationLog }
   | { type: 'BALANCE'; expenses: Expense[]; log: OperationLog }
-  | { type: 'RESET'; log: OperationLog }
-  | { type: 'SET_IDENTITY'; identity: Person }
+  | { type: 'RESET' }
+  | { type: 'SET_IDENTITY'; person: Person | null }
 
 function reducer(state: AppState, action: Action): AppState {
   switch (action.type) {
@@ -48,53 +45,33 @@ function reducer(state: AppState, action: Action): AppState {
     case 'UPDATE_EXPENSE':
       return {
         ...state,
-        expenses: state.expenses.map((e) =>
-          e.id === action.expense.id ? action.expense : e
-        ),
+        expenses: state.expenses.map((e) => (e.id === action.expense.id ? action.expense : e)),
       }
     case 'DELETE_EXPENSE':
-      return {
-        ...state,
-        expenses: state.expenses.filter((e) => e.id !== action.id),
-      }
+      return { ...state, expenses: state.expenses.filter((e) => e.id !== action.id) }
     case 'SET_TEMPLATES':
       return { ...state, templates: action.templates }
     case 'ADD_TEMPLATE':
-      return { ...state, templates: [...state.templates, action.template] }
+      return { ...state, templates: [action.template, ...state.templates] }
     case 'UPDATE_TEMPLATE':
       return {
         ...state,
-        templates: state.templates.map((t) =>
-          t.id === action.template.id ? action.template : t
-        ),
+        templates: state.templates.map((t) => (t.id === action.template.id ? action.template : t)),
       }
     case 'DELETE_TEMPLATE':
-      return {
-        ...state,
-        templates: state.templates.filter((t) => t.id !== action.id),
-      }
+      return { ...state, templates: state.templates.filter((t) => t.id !== action.id) }
+    case 'SET_OPERATION_LOGS':
+      return { ...state, operationLogs: action.logs }
     case 'SET_SETTINGS':
       return { ...state, settings: action.settings }
     case 'UPDATE_SETTINGS':
       return { ...state, settings: { ...state.settings, ...action.settings } }
-    case 'SET_OPERATION_LOGS':
-      return { ...state, operationLogs: action.logs }
-    case 'ADD_OPERATION_LOG':
-      return { ...state, operationLogs: [action.log, ...state.operationLogs] }
     case 'BALANCE':
-      return {
-        ...state,
-        expenses: action.expenses,
-        operationLogs: [action.log, ...state.operationLogs],
-      }
+      return { ...state, expenses: action.expenses, operationLogs: [action.log, ...state.operationLogs] }
     case 'RESET':
-      return {
-        ...state,
-        expenses: [],
-        operationLogs: [action.log, ...state.operationLogs],
-      }
+      return { ...state, expenses: [], operationLogs: [] }
     case 'SET_IDENTITY':
-      return { ...state, identity: action.identity }
+      return { ...state, identity: action.person }
     default:
       return state
   }
@@ -102,16 +79,16 @@ function reducer(state: AppState, action: Action): AppState {
 
 interface AppContextValue {
   state: AppState
-  addExpense: (expense: Omit<Expense, 'id' | 'createdAt' | 'updatedAt'> & { createdAt?: string }) => void
+  addExpense: (expense: Expense) => void
   updateExpense: (expense: Expense) => void
   deleteExpense: (id: string) => void
-  addTemplate: (template: Omit<Template, 'id'>) => void
+  addTemplate: (template: Template) => void
   updateTemplate: (template: Template) => void
   deleteTemplate: (id: string) => void
   updateSettings: (settings: Partial<Settings>) => void
-  performBalanceAction: () => void
-  performResetAction: () => void
-  setIdentity: (person: Person) => void
+  performBalance: () => void
+  performReset: () => void
+  setIdentity: (person: Person | null) => void
 }
 
 const AppContext = createContext<AppContextValue | null>(null)
@@ -134,7 +111,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           const unsub3 = subscribeToOperationLogs(db, (logs) => dispatch({ type: 'SET_OPERATION_LOGS', logs }))
           const unsub4 = subscribeToSettings(db, (remoteSettings) => {
             // Preserve local-only settings when syncing from Firebase
-            const { theme: _, colorKiki: _ck, colorWayne: _cw, exchangeRatesUpdatedAt, ...rest } = remoteSettings
+            const { theme, colorKiki, colorWayne, exchangeRatesUpdatedAt, ...rest } = remoteSettings as Settings
+            void theme; void colorKiki; void colorWayne;
             dispatch({ type: 'UPDATE_SETTINGS', settings: {
               ...rest,
               ...(exchangeRatesUpdatedAt ? { exchangeRatesUpdatedAt } : {}),
@@ -150,49 +128,26 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     }
   }, [])
 
-  // Fetch exchange rates on first launch — only for whitelisted currencies
-  useEffect(() => {
-    if (Object.keys(state.settings.exchangeRates).length === 0) {
-      const CURRENCY_WHITELIST = ['JPY', 'THB', 'USD', 'CNY']
-      fetchExchangeRates(state.settings.defaultCurrency)
-        .then((rates) => {
-          const filtered: Record<string, number> = {}
-          for (const code of CURRENCY_WHITELIST) {
-            if (rates[code]) filtered[code] = rates[code]
-          }
-          dispatch({ type: 'UPDATE_SETTINGS', settings: { exchangeRates: filtered, exchangeRatesUpdatedAt: new Date().toISOString() } })
-        })
-        .catch(() => {
-          // Silently fail — user can manually set rates
-        })
-    }
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
-
-  // Save to localStorage on state change
   useEffect(() => {
     saveState(state)
   }, [state])
 
-  const addExpense = useCallback((data: Omit<Expense, 'id' | 'createdAt' | 'updatedAt'> & { createdAt?: string }) => {
-    const now = new Date().toISOString()
-    const expense: Expense = { ...data, id: generateId(), createdAt: data.createdAt || now, updatedAt: now }
+  const addExpenseAction = useCallback((expense: Expense) => {
     dispatch({ type: 'ADD_EXPENSE', expense })
     if (dbRef.current) syncExpense(dbRef.current, expense)
   }, [])
 
-  const updateExpense = useCallback((expense: Expense) => {
-    const updated = { ...expense, updatedAt: new Date().toISOString() }
-    dispatch({ type: 'UPDATE_EXPENSE', expense: updated })
-    if (dbRef.current) syncExpense(dbRef.current, updated)
+  const updateExpenseAction = useCallback((expense: Expense) => {
+    dispatch({ type: 'UPDATE_EXPENSE', expense })
+    if (dbRef.current) syncExpense(dbRef.current, expense)
   }, [])
 
-  const deleteExpense = useCallback((id: string) => {
+  const deleteExpenseAction = useCallback((id: string) => {
     dispatch({ type: 'DELETE_EXPENSE', id })
     if (dbRef.current) deleteExpenseFromFirestore(dbRef.current, id)
   }, [])
 
-  const addTemplate = useCallback((data: Omit<Template, 'id'>) => {
-    const template: Template = { ...data, id: generateId() }
+  const addTemplate = useCallback((template: Template) => {
     dispatch({ type: 'ADD_TEMPLATE', template })
     if (dbRef.current) syncTemplate(dbRef.current, template)
   }, [])
@@ -210,9 +165,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const updateSettingsAction = useCallback((settings: Partial<Settings>) => {
     dispatch({ type: 'UPDATE_SETTINGS', settings })
     // Sync settings to Firebase, but exclude local-only preferences
-    const merged = { ...state.settings, ...settings }
-    const { theme: _, colorKiki: _ck, colorWayne: _cw, ...settingsToSync } = merged
-    if (dbRef.current) syncSettings(dbRef.current, settingsToSync as Settings)
+    const settingsToSync = { ...state.settings, ...settings }
+    const { theme, colorKiki, colorWayne, ...rest } = settingsToSync as Settings
+    void theme; void colorKiki; void colorWayne;
+    if (dbRef.current) syncSettings(dbRef.current, rest as Settings)
   }, [state.settings])
 
   const performBalanceAction = useCallback(() => {
@@ -228,54 +184,33 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     dispatch({ type: 'BALANCE', expenses: result.newExpenses, log })
     if (dbRef.current) {
       batchReplaceExpenses(dbRef.current, result.newExpenses)
-      syncOperationLog(dbRef.current, log)
     }
   }, [state.expenses, state.settings])
 
   const performResetAction = useCallback(() => {
-    const snapshot = state.expenses.map((e) => ({
-      payer: e.payer,
-      item: e.item,
-      amount: e.amount,
-      currency: e.currency,
-      convertedAmount: e.convertedAmount,
-    }))
-    const totals = calculateTotals(state.expenses)
-    const now = new Date().toISOString()
-    const log: OperationLog = {
-      id: generateId(),
-      type: 'reset',
-      timestamp: now,
-      beforeKiki: totals.kiki,
-      beforeWayne: totals.wayne,
-      afterKiki: 0,
-      afterWayne: 0,
-      snapshot,
-    }
-    dispatch({ type: 'RESET', log })
+    dispatch({ type: 'RESET' })
     if (dbRef.current) {
-      batchDeleteAllExpenses(dbRef.current)
-      syncOperationLog(dbRef.current, log)
+      batchReplaceExpenses(dbRef.current, [])
     }
-  }, [state.expenses])
+  }, [])
 
-  const setIdentity = useCallback((person: Person) => {
-    dispatch({ type: 'SET_IDENTITY', identity: person })
+  const setIdentity = useCallback((person: Person | null) => {
+    dispatch({ type: 'SET_IDENTITY', person })
   }, [])
 
   return (
     <AppContext.Provider
       value={{
         state,
-        addExpense,
-        updateExpense,
-        deleteExpense,
+        addExpense: addExpenseAction,
+        updateExpense: updateExpenseAction,
+        deleteExpense: deleteExpenseAction,
         addTemplate,
         updateTemplate,
         deleteTemplate,
         updateSettings: updateSettingsAction,
-        performBalanceAction,
-        performResetAction,
+        performBalance: performBalanceAction,
+        performReset: performResetAction,
         setIdentity,
       }}
     >
