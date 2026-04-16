@@ -3,13 +3,23 @@ import type { AppState, Settings } from '../types'
 const STORAGE_KEY = 'kw-balance-data'
 const IDENTITY_KEY = 'kw-balance-identity'
 
+function getInitialTheme(): Settings['theme'] {
+  if (
+    typeof window !== 'undefined' &&
+    window.matchMedia('(prefers-color-scheme: dark)').matches
+  ) {
+    return 'dark'
+  }
+  return 'light'
+}
+
 export const defaultSettings: Settings = {
   ratioWayne: 67,
   ratioKiki: 33,
   defaultCurrency: 'TWD',
   exchangeRates: {},
   timezone: 'Asia/Taipei',
-  theme: 'light',
+  theme: getInitialTheme(),
   colorKiki: '#FF6B9D',
   colorWayne: '#4ECDC4',
 }
