@@ -254,6 +254,7 @@ export function ExpenseForm({
             : ""
         }
         confirmText={editingExpense ? "仍要更新" : "仍要新增"}
+        requireSecondConfirm={false}
         onConfirm={() => {
           setPendingDuplicate(null);
           submitExpense();

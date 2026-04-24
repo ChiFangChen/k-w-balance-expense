@@ -165,6 +165,7 @@ export function Expenses() {
         }
         confirmText="刪除"
         danger
+        requireSecondConfirm={false}
         onConfirm={() => {
           if (pendingDeleteExpense) deleteExpense(pendingDeleteExpense.id);
           setPendingDeleteExpense(null);
