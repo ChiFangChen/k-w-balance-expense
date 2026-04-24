@@ -395,7 +395,7 @@ export function SettingsPage() {
       <section className="settings-section">
         <div style={{ display: 'flex', alignItems: 'center' }}>
           <h2 style={{ margin: 0 }}>目前身份: {state.identity}</h2>
-          <button className="btn btn-sm btn-warning" onClick={handleSwitchIdentity} style={{ marginLeft: 'auto' }}>
+          <button className="btn btn-sm btn-soft-neutral" onClick={handleSwitchIdentity} style={{ marginLeft: 'auto' }}>
             切換身份
           </button>
         </div>

@@ -198,13 +198,13 @@ export function Dashboard() {
       {total > 0 && (
         <div className="action-buttons">
           <button
-            className="btn btn-warning"
+            className="btn btn-soft-balance"
             onClick={() => setShowBalanceConfirm(true)}
           >
             <FontAwesomeIcon icon={faScaleBalanced} /> 平衡
           </button>
           <button
-            className="btn btn-danger"
+            className="btn btn-soft-danger"
             onClick={() => setShowResetConfirm(true)}
           >
             <FontAwesomeIcon icon={faTrashCan} /> 重置

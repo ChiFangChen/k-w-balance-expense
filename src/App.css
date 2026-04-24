@@ -11,6 +11,15 @@
   --color-destructive: #ef4444;
   --color-destructive-foreground: #ffffff;
   --color-warning: #f59e0b;
+  --color-neutral-action: #e2e8f0;
+  --color-neutral-action-hover: #cbd5e1;
+  --color-neutral-action-foreground: #475569;
+  --color-balance-action: #dbe4f0;
+  --color-balance-action-hover: #c9d6e5;
+  --color-balance-action-foreground: #334155;
+  --color-danger-soft: #fee2e2;
+  --color-danger-soft-hover: #fecaca;
+  --color-danger-soft-foreground: #b91c1c;
   --color-kiki: #FF6B9D;
   --color-kiki-light: #fce7f3;
   --color-wayne: #4ECDC4;
@@ -37,6 +46,15 @@
   --color-destructive: #f87171;
   --color-destructive-foreground: #ffffff;
   --color-warning: #fbbf24;
+  --color-neutral-action: #334155;
+  --color-neutral-action-hover: #475569;
+  --color-neutral-action-foreground: #cbd5e1;
+  --color-balance-action: #243244;
+  --color-balance-action-hover: #334155;
+  --color-balance-action-foreground: #dbe4f0;
+  --color-danger-soft: rgba(248, 113, 113, 0.16);
+  --color-danger-soft-hover: rgba(248, 113, 113, 0.24);
+  --color-danger-soft-foreground: #fca5a5;
   --color-kiki: #FF6B9D;
   --color-kiki-light: rgba(255, 107, 157, 0.2);
   --color-wayne: #4ECDC4;
@@ -219,8 +237,11 @@ body {
   background-color: var(--color-wayne);
 }
 .quick-add-btn.neutral-color {
-  background-color: var(--color-primary);
-  color: var(--color-primary-foreground);
+  background-color: var(--color-neutral-action);
+  color: var(--color-neutral-action-foreground);
+}
+.quick-add-btn.neutral-color:hover {
+  background-color: var(--color-neutral-action-hover);
 }
 
 /* Cards */
@@ -439,6 +460,27 @@ body {
 }
 .btn-warning:hover {
   opacity: 0.9;
+}
+.btn-soft-balance {
+  background-color: var(--color-balance-action);
+  color: var(--color-balance-action-foreground);
+}
+.btn-soft-balance:hover {
+  background-color: var(--color-balance-action-hover);
+}
+.btn-soft-danger {
+  background-color: var(--color-danger-soft);
+  color: var(--color-danger-soft-foreground);
+}
+.btn-soft-danger:hover {
+  background-color: var(--color-danger-soft-hover);
+}
+.btn-soft-neutral {
+  background-color: var(--color-neutral-action);
+  color: var(--color-neutral-action-foreground);
+}
+.btn-soft-neutral:hover {
+  background-color: var(--color-neutral-action-hover);
 }
 .btn-sm {
   padding: 0.375rem 0.75rem;
