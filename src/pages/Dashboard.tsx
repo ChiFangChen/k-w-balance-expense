@@ -1,32 +1,40 @@
-import { useState } from 'react'
-import { Pie } from 'react-chartjs-2'
-import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faScaleBalanced, faTrashCan, faPlus } from '@fortawesome/free-solid-svg-icons'
-import { useApp } from '../context/AppContext'
-import { calculateTotals, calculateCurrentRatio, calculateGap } from '../utils/balance'
-import { ConfirmDialog } from '../components/ConfirmDialog'
-import { ExpenseForm } from '../components/ExpenseForm'
-import type { Person } from '../types'
+import { useState } from "react";
+import { Pie } from "react-chartjs-2";
+import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faScaleBalanced,
+  faTrashCan,
+  faPlus,
+} from "@fortawesome/free-solid-svg-icons";
+import { useApp } from "../context/AppContext";
+import {
+  calculateTotals,
+  calculateCurrentRatio,
+  calculateGap,
+} from "../utils/balance";
+import { ConfirmDialog } from "../components/ConfirmDialog";
+import { ExpenseForm } from "../components/ExpenseForm";
+import type { Person } from "../types";
 
-ChartJS.register(ArcElement, Tooltip, Legend)
+ChartJS.register(ArcElement, Tooltip, Legend);
 
 export function Dashboard() {
-  const { state, performBalance, performReset } = useApp()
-  const { expenses, settings } = state
+  const { state, performBalance, performReset } = useApp();
+  const { expenses, settings } = state;
 
-  const [showBalanceConfirm, setShowBalanceConfirm] = useState(false)
-  const [showResetConfirm, setShowResetConfirm] = useState(false)
-  const [showExpenseForm, setShowExpenseForm] = useState(false)
-  const [defaultPayer, setDefaultPayer] = useState<Person | undefined>()
+  const [showBalanceConfirm, setShowBalanceConfirm] = useState(false);
+  const [showResetConfirm, setShowResetConfirm] = useState(false);
+  const [showExpenseForm, setShowExpenseForm] = useState(false);
+  const [defaultPayer, setDefaultPayer] = useState<Person | undefined>();
 
-  const totals = calculateTotals(expenses)
-  const ratio = calculateCurrentRatio(totals)
-  const gap = calculateGap(totals, settings)
-  const total = totals.kiki + totals.wayne
+  const totals = calculateTotals(expenses);
+  const ratio = calculateCurrentRatio(totals);
+  const gap = calculateGap(totals, settings);
+  const total = totals.kiki + totals.wayne;
 
   const donutData = {
-    labels: ['Wayne', 'Kiki'],
+    labels: ["Wayne", "Kiki"],
     datasets: [
       {
         data: [totals.wayne || 0, totals.kiki || 0],
@@ -35,60 +43,47 @@ export function Dashboard() {
         borderWidth: 2,
       },
     ],
-  }
+  };
 
-  const totalText = `$${Math.ceil(total).toLocaleString()}`
+  const totalText = `$${Math.ceil(total).toLocaleString()}`;
 
   const donutPlugins = {
-    id: 'donutLabels',
+    id: "donutLabels",
     afterDraw(chart: ChartJS) {
-      const { ctx, chartArea } = chart
-      const centerX = (chartArea.left + chartArea.right) / 2
-      const centerY = (chartArea.top + chartArea.bottom) / 2
-
-      // Draw percentage on each slice
-      const meta = chart.getDatasetMeta(0)
-      meta.data.forEach((element, i) => {
-        const { x, y } = element
-        const pct = i === 0 ? ratio.wayne : ratio.kiki
-        ctx.save()
-        ctx.fillStyle = 'white'
-        ctx.font = 'bold 13px sans-serif'
-        ctx.textAlign = 'center'
-        ctx.textBaseline = 'middle'
-        ctx.fillText(`${pct}%`, x, y)
-        ctx.restore()
-      })
+      const { ctx, chartArea } = chart;
+      const centerX = (chartArea.left + chartArea.right) / 2;
+      const centerY = (chartArea.top + chartArea.bottom) / 2;
 
       // Draw total in center
-      ctx.save()
-      ctx.fillStyle = getComputedStyle(chart.canvas).getPropertyValue('color') || '#0f172a'
-      ctx.font = 'bold 18px sans-serif'
-      ctx.textAlign = 'center'
-      ctx.textBaseline = 'middle'
-      ctx.fillText(totalText, centerX, centerY - 8)
-      ctx.font = '12px sans-serif'
-      ctx.globalAlpha = 0.5
-      ctx.fillText(settings.defaultCurrency, centerX, centerY + 12)
-      ctx.restore()
+      ctx.save();
+      ctx.fillStyle =
+        getComputedStyle(chart.canvas).getPropertyValue("color") || "#0f172a";
+      ctx.font = "bold 18px sans-serif";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(totalText, centerX, centerY - 8);
+      ctx.font = "12px sans-serif";
+      ctx.globalAlpha = 0.5;
+      ctx.fillText(settings.defaultCurrency, centerX, centerY + 12);
+      ctx.restore();
     },
-  }
+  };
 
   const donutOptions = {
     responsive: true,
-    cutout: '45%',
+    cutout: "45%",
     plugins: {
       legend: {
-        position: 'bottom' as const,
+        position: "bottom" as const,
         reverse: true,
       },
     },
-  }
+  };
 
   const openForm = (payer?: Person) => {
-    setDefaultPayer(payer)
-    setShowExpenseForm(true)
-  }
+    setDefaultPayer(payer);
+    setShowExpenseForm(true);
+  };
 
   return (
     <div className="page dashboard">
@@ -100,11 +95,20 @@ export function Dashboard() {
       {/* Gap - most prominent */}
       {gap.person ? (
         <div className="gap-hero">
-          <div className="gap-hero-person" style={{ color: gap.person === 'Kiki' ? 'var(--color-kiki)' : 'var(--color-wayne)' }}>
+          <div
+            className="gap-hero-person"
+            style={{
+              color:
+                gap.person === "Kiki"
+                  ? "var(--color-kiki)"
+                  : "var(--color-wayne)",
+            }}
+          >
             {gap.person}
           </div>
           <div className="gap-hero-amount">
-            還需花 <strong>${Math.ceil(gap.amount).toLocaleString()}</strong> {settings.defaultCurrency} 才能平衡
+            還需花 <strong>${Math.ceil(gap.amount).toLocaleString()}</strong>{" "}
+            {settings.defaultCurrency} 才能平衡
           </div>
         </div>
       ) : total > 0 ? (
@@ -115,13 +119,22 @@ export function Dashboard() {
 
       {/* Quick Add Buttons */}
       <div className="quick-add">
-        <button className="btn quick-add-btn kiki-color" onClick={() => openForm('Kiki')}>
+        <button
+          className="btn quick-add-btn kiki-color"
+          onClick={() => openForm("Kiki")}
+        >
           K
         </button>
-        <button className="btn quick-add-btn neutral-color" onClick={() => openForm()}>
+        <button
+          className="btn quick-add-btn neutral-color"
+          onClick={() => openForm()}
+        >
           <FontAwesomeIcon icon={faPlus} />
         </button>
-        <button className="btn quick-add-btn wayne-color" onClick={() => openForm('Wayne')}>
+        <button
+          className="btn quick-add-btn wayne-color"
+          onClick={() => openForm("Wayne")}
+        >
           W
         </button>
       </div>
@@ -132,19 +145,27 @@ export function Dashboard() {
         <div className="total-card kiki-card">
           <div className="total-label">Kiki</div>
           <div className="total-ratio-main">{ratio.kiki}%</div>
-          <div className="total-amount-sub">${Math.ceil(totals.kiki).toLocaleString()}</div>
+          <div className="total-amount-sub">
+            ${Math.ceil(totals.kiki).toLocaleString()}
+          </div>
         </div>
         <div className="total-card wayne-card">
           <div className="total-label">Wayne</div>
           <div className="total-ratio-main">{ratio.wayne}%</div>
-          <div className="total-amount-sub">${Math.ceil(totals.wayne).toLocaleString()}</div>
+          <div className="total-amount-sub">
+            ${Math.ceil(totals.wayne).toLocaleString()}
+          </div>
         </div>
       </div>
 
       {/* Donut Chart with total in center */}
       {total > 0 && (
         <div className="chart-container">
-          <Pie data={donutData} options={donutOptions} plugins={[donutPlugins]} />
+          <Pie
+            data={donutData}
+            options={donutOptions}
+            plugins={[donutPlugins]}
+          />
         </div>
       )}
 
@@ -154,13 +175,19 @@ export function Dashboard() {
         <div className="target-ratio-track">
           <div
             className="target-ratio-fill kiki-fill"
-            style={{ width: `${settings.ratioKiki}%`, backgroundColor: settings.colorKiki }}
+            style={{
+              width: `${settings.ratioKiki}%`,
+              backgroundColor: settings.colorKiki,
+            }}
           >
             {settings.ratioKiki}%
           </div>
           <div
             className="target-ratio-fill wayne-fill"
-            style={{ width: `${settings.ratioWayne}%`, backgroundColor: settings.colorWayne }}
+            style={{
+              width: `${settings.ratioWayne}%`,
+              backgroundColor: settings.colorWayne,
+            }}
           >
             {settings.ratioWayne}%
           </div>
@@ -192,8 +219,8 @@ export function Dashboard() {
         message={`將等比例縮小帳目金額，Kiki: $${Math.ceil(totals.kiki).toLocaleString()}, Wayne: $${Math.ceil(totals.wayne).toLocaleString()}`}
         confirmText="執行平衡"
         onConfirm={() => {
-          performBalance()
-          setShowBalanceConfirm(false)
+          performBalance();
+          setShowBalanceConfirm(false);
         }}
         onCancel={() => setShowBalanceConfirm(false)}
         danger
@@ -204,8 +231,8 @@ export function Dashboard() {
         message="將刪除所有帳目資料，此操作無法復原！"
         confirmText="執行重置"
         onConfirm={() => {
-          performReset()
-          setShowResetConfirm(false)
+          performReset();
+          setShowResetConfirm(false);
         }}
         onCancel={() => setShowResetConfirm(false)}
         danger
@@ -219,5 +246,5 @@ export function Dashboard() {
         />
       )}
     </div>
-  )
+  );
 }
