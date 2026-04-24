@@ -1,47 +1,61 @@
-import { useState } from 'react'
-import { useApp } from '../context/AppContext'
-import type { Person, Expense } from '../types'
-import { convertToDefault } from '../utils/currency'
-import { isoToLocalDatetime, localDatetimeToISO } from '../utils/date'
-import { generateId } from '../utils/id'
+import { useState } from "react";
+import { useApp } from "../context/AppContext";
+import type { Person, Expense } from "../types";
+import { convertToDefault } from "../utils/currency";
+import { isoToLocalDatetime, localDatetimeToISO } from "../utils/date";
+import { generateId } from "../utils/id";
+import { ConfirmDialog } from "./ConfirmDialog";
+import { findDuplicateExpense } from "../utils/expenseDuplicate";
 
 interface ExpenseFormProps {
-  defaultPayer?: Person
-  editingExpense?: Expense
-  onClose: () => void
+  defaultPayer?: Person;
+  editingExpense?: Expense;
+  onClose: () => void;
 }
 
-export function ExpenseForm({ defaultPayer, editingExpense, onClose }: ExpenseFormProps) {
-  const { state, addExpense, updateExpense, addTemplate } = useApp()
-  const { settings } = state
+export function ExpenseForm({
+  defaultPayer,
+  editingExpense,
+  onClose,
+}: ExpenseFormProps) {
+  const { state, addExpense, updateExpense, addTemplate } = useApp();
+  const { settings } = state;
 
-  const [payer, setPayer] = useState<Person | undefined>(editingExpense?.payer || defaultPayer)
-  const [item, setItem] = useState(editingExpense?.item || '')
-  const [amount, setAmount] = useState(editingExpense?.amount?.toString() || '')
-  const [currency, setCurrency] = useState(editingExpense?.currency || localStorage.getItem('kw-last-currency') || settings.defaultCurrency)
-  const tz = settings.timezone || 'Asia/Taipei'
+  const [payer, setPayer] = useState<Person | undefined>(
+    editingExpense?.payer || defaultPayer,
+  );
+  const [item, setItem] = useState(editingExpense?.item || "");
+  const [amount, setAmount] = useState(
+    editingExpense?.amount?.toString() || "",
+  );
+  const [currency, setCurrency] = useState(
+    editingExpense?.currency ||
+      localStorage.getItem("kw-last-currency") ||
+      settings.defaultCurrency,
+  );
+  const tz = settings.timezone || "Asia/Taipei";
   const [datetime, setDatetime] = useState(() => {
-    if (editingExpense) return isoToLocalDatetime(editingExpense.createdAt, tz)
-    return isoToLocalDatetime(new Date().toISOString(), tz)
-  })
-  const [saveAsTemplate, setSaveAsTemplate] = useState(false)
+    if (editingExpense) return isoToLocalDatetime(editingExpense.createdAt, tz);
+    return isoToLocalDatetime(new Date().toISOString(), tz);
+  });
+  const [saveAsTemplate, setSaveAsTemplate] = useState(false);
+  const [pendingDuplicate, setPendingDuplicate] = useState<Expense | null>(
+    null,
+  );
 
-  const trackedList: string[] = JSON.parse(localStorage.getItem('kw-tracked-currencies') || '[]')
-  const currencyOptions = ['TWD', ...trackedList.filter((c) => c !== 'TWD')]
+  const submitExpense = () => {
+    const numAmount = parseFloat(amount);
+    if (!payer || isNaN(numAmount) || numAmount <= 0) return;
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    const numAmount = parseFloat(amount)
-    if (!payer || isNaN(numAmount) || numAmount <= 0) return
-
+    const createdAt = localDatetimeToISO(datetime, tz);
     const { convertedAmount, exchangeRate } = convertToDefault(
       numAmount,
       currency,
       settings.defaultCurrency,
-      settings.exchangeRates
-    )
+      settings.exchangeRates,
+    );
 
-    const now = new Date().toISOString()
+    const now = new Date().toISOString();
 
     if (editingExpense && editingExpense.id) {
       updateExpense({
@@ -52,9 +66,9 @@ export function ExpenseForm({ defaultPayer, editingExpense, onClose }: ExpenseFo
         currency,
         exchangeRate,
         convertedAmount,
-        createdAt: localDatetimeToISO(datetime, tz),
+        createdAt,
         updatedAt: now,
-      })
+      });
     } else {
       addExpense({
         id: generateId(),
@@ -64,9 +78,9 @@ export function ExpenseForm({ defaultPayer, editingExpense, onClose }: ExpenseFo
         currency,
         exchangeRate,
         convertedAmount,
-        createdAt: localDatetimeToISO(datetime, tz),
+        createdAt,
         updatedAt: now,
-      })
+      });
 
       if (saveAsTemplate) {
         addTemplate({
@@ -75,18 +89,49 @@ export function ExpenseForm({ defaultPayer, editingExpense, onClose }: ExpenseFo
           item: item.trim(),
           amount: numAmount,
           currency,
-        })
+        });
       }
     }
-    localStorage.setItem('kw-last-currency', currency)
-    onClose()
-  }
+    localStorage.setItem("kw-last-currency", currency);
+    onClose();
+  };
+
+  const trackedList: string[] = JSON.parse(
+    localStorage.getItem("kw-tracked-currencies") || "[]",
+  );
+  const currencyOptions = ["TWD", ...trackedList.filter((c) => c !== "TWD")];
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const numAmount = parseFloat(amount);
+    if (!payer || isNaN(numAmount) || numAmount <= 0) return;
+
+    const createdAt = localDatetimeToISO(datetime, tz);
+    const duplicate = findDuplicateExpense({
+      expenses: state.expenses,
+      draft: {
+        payer,
+        amount: numAmount,
+        currency,
+        createdAt,
+      },
+      timezone: tz,
+      excludeExpenseId: editingExpense?.id,
+    });
+
+    if (duplicate) {
+      setPendingDuplicate(duplicate);
+      return;
+    }
+
+    submitExpense();
+  };
 
   return (
     <div className="popup-overlay" onClick={onClose}>
       <div className="popup expense-form" onClick={(e) => e.stopPropagation()}>
         <div className="popup-header">
-          <h3>{editingExpense ? '編輯帳目' : '新增帳目'}</h3>
+          <h3>{editingExpense ? "編輯帳目" : "新增帳目"}</h3>
         </div>
         <div className="popup-body">
           <form id="expense-form" onSubmit={handleSubmit}>
@@ -95,17 +140,25 @@ export function ExpenseForm({ defaultPayer, editingExpense, onClose }: ExpenseFo
               <div className="payer-select">
                 <button
                   type="button"
-                  className={`btn ${payer === 'Kiki' ? 'btn-primary' : 'btn-secondary'}`}
-                  style={payer === 'Kiki' ? { background: 'var(--color-kiki)', color: 'white' } : {}}
-                  onClick={() => setPayer('Kiki')}
+                  className={`btn ${payer === "Kiki" ? "btn-primary" : "btn-secondary"}`}
+                  style={
+                    payer === "Kiki"
+                      ? { background: "var(--color-kiki)", color: "white" }
+                      : {}
+                  }
+                  onClick={() => setPayer("Kiki")}
                 >
                   Kiki
                 </button>
                 <button
                   type="button"
-                  className={`btn ${payer === 'Wayne' ? 'btn-primary' : 'btn-secondary'}`}
-                  style={payer === 'Wayne' ? { background: 'var(--color-wayne)', color: 'white' } : {}}
-                  onClick={() => setPayer('Wayne')}
+                  className={`btn ${payer === "Wayne" ? "btn-primary" : "btn-secondary"}`}
+                  style={
+                    payer === "Wayne"
+                      ? { background: "var(--color-wayne)", color: "white" }
+                      : {}
+                  }
+                  onClick={() => setPayer("Wayne")}
                 >
                   Wayne
                 </button>
@@ -136,9 +189,14 @@ export function ExpenseForm({ defaultPayer, editingExpense, onClose }: ExpenseFo
               </div>
               <div className="form-group">
                 <label>幣別</label>
-                <select value={currency} onChange={(e) => setCurrency(e.target.value)}>
+                <select
+                  value={currency}
+                  onChange={(e) => setCurrency(e.target.value)}
+                >
                   {currencyOptions.map((c) => (
-                    <option key={c} value={c}>{c}</option>
+                    <option key={c} value={c}>
+                      {c}
+                    </option>
                   ))}
                 </select>
               </div>
@@ -146,7 +204,8 @@ export function ExpenseForm({ defaultPayer, editingExpense, onClose }: ExpenseFo
 
             {currency !== settings.defaultCurrency && (
               <div className="exchange-info">
-                匯率: 1 {currency} = {settings.exchangeRates[currency] || '?'} {settings.defaultCurrency}
+                匯率: 1 {currency} = {settings.exchangeRates[currency] || "?"}{" "}
+                {settings.defaultCurrency}
               </div>
             )}
 
@@ -176,11 +235,31 @@ export function ExpenseForm({ defaultPayer, editingExpense, onClose }: ExpenseFo
           <button type="button" className="btn btn-secondary" onClick={onClose}>
             取消
           </button>
-          <button type="submit" form="expense-form" className="btn btn-primary" disabled={!payer}>
-            {editingExpense ? '更新' : '新增'}
+          <button
+            type="submit"
+            form="expense-form"
+            className="btn btn-primary"
+            disabled={!payer}
+          >
+            {editingExpense ? "更新" : "新增"}
           </button>
         </div>
       </div>
+      <ConfirmDialog
+        isOpen={pendingDuplicate !== null}
+        title="疑似重複帳目"
+        message={
+          pendingDuplicate
+            ? `同一天已有一筆 ${pendingDuplicate.payer} 的「${pendingDuplicate.item || "未命名項目"}」${pendingDuplicate.amount} ${pendingDuplicate.currency} 紀錄，確定仍要${editingExpense ? "更新" : "新增"}嗎？`
+            : ""
+        }
+        confirmText={editingExpense ? "仍要更新" : "仍要新增"}
+        onConfirm={() => {
+          setPendingDuplicate(null);
+          submitExpense();
+        }}
+        onCancel={() => setPendingDuplicate(null)}
+      />
     </div>
-  )
+  );
 }

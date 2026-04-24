@@ -1,44 +1,48 @@
-import { useState, useMemo } from 'react'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faPlus } from '@fortawesome/free-solid-svg-icons'
-import { useApp } from '../context/AppContext'
-import { ExpenseForm } from '../components/ExpenseForm'
-import { formatDate } from '../utils/date'
-import type { Person, Expense } from '../types'
+import { useState, useMemo } from "react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faPlus } from "@fortawesome/free-solid-svg-icons";
+import { useApp } from "../context/AppContext";
+import { ExpenseForm } from "../components/ExpenseForm";
+import { ConfirmDialog } from "../components/ConfirmDialog";
+import { formatDate } from "../utils/date";
+import type { Person, Expense } from "../types";
 
 export function Expenses() {
-  const { state, deleteExpense } = useApp()
-  const { expenses, settings } = state
+  const { state, deleteExpense } = useApp();
+  const { expenses, settings } = state;
 
-  const [search, setSearch] = useState('')
-  const [filter, setFilter] = useState<'all' | Person>('all')
-  const [showForm, setShowForm] = useState(false)
-  const [defaultPayer, setDefaultPayer] = useState<Person | undefined>()
-  const [editingExpense, setEditingExpense] = useState<Expense | undefined>()
+  const [search, setSearch] = useState("");
+  const [filter, setFilter] = useState<"all" | Person>("all");
+  const [showForm, setShowForm] = useState(false);
+  const [defaultPayer, setDefaultPayer] = useState<Person | undefined>();
+  const [editingExpense, setEditingExpense] = useState<Expense | undefined>();
+  const [pendingDeleteExpense, setPendingDeleteExpense] =
+    useState<Expense | null>(null);
 
   const filtered = useMemo(() => {
     return expenses
       .filter((e) => {
-        if (filter !== 'all' && e.payer !== filter) return false
-        if (search && !e.item.toLowerCase().includes(search.toLowerCase())) return false
-        return true
+        if (filter !== "all" && e.payer !== filter) return false;
+        if (search && !e.item.toLowerCase().includes(search.toLowerCase()))
+          return false;
+        return true;
       })
-      .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
-  }, [expenses, filter, search])
+      .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+  }, [expenses, filter, search]);
 
   const openForm = (payer?: Person) => {
-    setDefaultPayer(payer)
-    setEditingExpense(undefined)
-    setShowForm(true)
-  }
+    setDefaultPayer(payer);
+    setEditingExpense(undefined);
+    setShowForm(true);
+  };
 
   const openEdit = (expense: Expense) => {
-    setEditingExpense(expense)
-    setDefaultPayer(undefined)
-    setShowForm(true)
-  }
+    setEditingExpense(expense);
+    setDefaultPayer(undefined);
+    setShowForm(true);
+  };
 
-  const fmt = (iso: string) => formatDate(iso, settings.timezone)
+  const fmt = (iso: string) => formatDate(iso, settings.timezone);
 
   return (
     <div className="page expenses-page">
@@ -48,9 +52,24 @@ export function Expenses() {
 
       {/* Quick Add */}
       <div className="quick-add">
-        <button className="btn quick-add-btn kiki-color" onClick={() => openForm('Kiki')}>K</button>
-        <button className="btn quick-add-btn neutral-color" onClick={() => openForm()}><FontAwesomeIcon icon={faPlus} /></button>
-        <button className="btn quick-add-btn wayne-color" onClick={() => openForm('Wayne')}>W</button>
+        <button
+          className="btn quick-add-btn kiki-color"
+          onClick={() => openForm("Kiki")}
+        >
+          K
+        </button>
+        <button
+          className="btn quick-add-btn neutral-color"
+          onClick={() => openForm()}
+        >
+          <FontAwesomeIcon icon={faPlus} />
+        </button>
+        <button
+          className="btn quick-add-btn wayne-color"
+          onClick={() => openForm("Wayne")}
+        >
+          W
+        </button>
       </div>
 
       {/* Search */}
@@ -66,20 +85,20 @@ export function Expenses() {
       {/* Filter */}
       <div className="filter-bar">
         <button
-          className={`btn btn-sm ${filter === 'all' ? 'btn-primary' : 'btn-secondary'}`}
-          onClick={() => setFilter('all')}
+          className={`btn btn-sm ${filter === "all" ? "btn-primary" : "btn-secondary"}`}
+          onClick={() => setFilter("all")}
         >
           全部
         </button>
         <button
-          className={`btn btn-sm ${filter === 'Kiki' ? 'btn-primary' : 'btn-secondary'}`}
-          onClick={() => setFilter('Kiki')}
+          className={`btn btn-sm ${filter === "Kiki" ? "btn-primary" : "btn-secondary"}`}
+          onClick={() => setFilter("Kiki")}
         >
           Kiki
         </button>
         <button
-          className={`btn btn-sm ${filter === 'Wayne' ? 'btn-primary' : 'btn-secondary'}`}
-          onClick={() => setFilter('Wayne')}
+          className={`btn btn-sm ${filter === "Wayne" ? "btn-primary" : "btn-secondary"}`}
+          onClick={() => setFilter("Wayne")}
         >
           Wayne
         </button>
@@ -87,14 +106,16 @@ export function Expenses() {
 
       {/* Expense List */}
       <div className="expense-list">
-        {filtered.length === 0 && (
-          <div className="empty-state">還沒有帳目</div>
-        )}
+        {filtered.length === 0 && <div className="empty-state">還沒有帳目</div>}
         {filtered.map((expense) => (
-          <div key={expense.id} className="expense-item" onClick={() => openEdit(expense)}>
+          <div
+            key={expense.id}
+            className="expense-item"
+            onClick={() => openEdit(expense)}
+          >
             <div className="expense-left">
               <span className={`payer-badge ${expense.payer.toLowerCase()}`}>
-                {expense.payer === 'Kiki' ? 'K' : 'W'}
+                {expense.payer === "Kiki" ? "K" : "W"}
               </span>
               <div className="expense-info">
                 <div className="expense-item-name">{expense.item}</div>
@@ -107,14 +128,15 @@ export function Expenses() {
               </div>
               {expense.currency !== settings.defaultCurrency && (
                 <div className="expense-converted">
-                  ≈ ${Math.ceil(expense.convertedAmount).toLocaleString()} {settings.defaultCurrency}
+                  ≈ ${Math.ceil(expense.convertedAmount).toLocaleString()}{" "}
+                  {settings.defaultCurrency}
                 </div>
               )}
               <button
                 className="btn-icon btn-delete"
                 onClick={(e) => {
-                  e.stopPropagation()
-                  deleteExpense(expense.id)
+                  e.stopPropagation();
+                  setPendingDeleteExpense(expense);
                 }}
               >
                 ✕
@@ -132,6 +154,23 @@ export function Expenses() {
           onClose={() => setShowForm(false)}
         />
       )}
+
+      <ConfirmDialog
+        isOpen={pendingDeleteExpense !== null}
+        title="刪除帳目"
+        message={
+          pendingDeleteExpense
+            ? `確定要刪除「${pendingDeleteExpense.item}」嗎？`
+            : ""
+        }
+        confirmText="刪除"
+        danger
+        onConfirm={() => {
+          if (pendingDeleteExpense) deleteExpense(pendingDeleteExpense.id);
+          setPendingDeleteExpense(null);
+        }}
+        onCancel={() => setPendingDeleteExpense(null)}
+      />
     </div>
-  )
+  );
 }
